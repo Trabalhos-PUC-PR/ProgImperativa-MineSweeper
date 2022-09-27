@@ -1,4 +1,5 @@
-# C Lion configs
+# Ide configs
+.vscode/
 .idea/
 *.iml
 
