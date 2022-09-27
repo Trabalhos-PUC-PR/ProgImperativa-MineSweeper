@@ -1,3 +1,7 @@
+# C Lion configs
+.idea/
+*.iml
+
 # Prerequisites
 *.d
 
@@ -35,6 +39,11 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Any compiled, extension-less files 
+*
+!*/
+!*.*
 
 # Debug files
 *.dSYM/
