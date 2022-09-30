@@ -10,6 +10,10 @@
 
 #include "boolean.h"
 
+extern int fieldWidth;
+extern int fieldHeight;
+extern int totalPlacedBombs;
+
 void allocateField(int width, int height);
 void printField();
 enum boolean fieldSetBomb(int x, int y);

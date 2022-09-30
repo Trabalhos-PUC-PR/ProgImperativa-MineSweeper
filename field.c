@@ -6,6 +6,7 @@
 
 int fieldWidth = 0;
 int fieldHeight = 0;
+int totalPlacedBombs = 0;
 struct Square **field;
 /**
  * @brief the separator that will be between squares on the game
@@ -29,6 +30,9 @@ void allocateField(int width, int height) {
 	fieldHeight = height;
 }
 
+/**
+ * Sets a bomb in given coordinate, returns false if its unable to set bomb
+ */
 enum boolean fieldSetBomb(int height, int width) {
 	if (height < 0 || height >= fieldWidth) {
 		return false;
@@ -36,7 +40,11 @@ enum boolean fieldSetBomb(int height, int width) {
 	if (width < 0 || width >= fieldHeight) {
 		return false;
 	}
+	if(field[height][width].isBomb){
+		return false;
+	}
 	field[height][width].isBomb = true;
+	totalPlacedBombs++;
 	return true;
 }
 

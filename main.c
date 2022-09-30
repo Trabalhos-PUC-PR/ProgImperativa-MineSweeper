@@ -8,9 +8,17 @@
 
 int main() {
 	randomSetupSeed();
-	allocateField(3, 3);
+	allocateField(9, 9);
 
-	printf("success %d\n", fieldSetBomb(2, 2));
+	int totalBombs = 35;
+	for (int i = 0; i < totalBombs; i++) {
+		enum boolean setted = fieldSetBomb(randomNum(fieldHeight - 1),
+				randomNum(fieldWidth - 1));
+		while (setted == false) {
+			setted = fieldSetBomb(randomNum(fieldHeight - 1),
+					randomNum(fieldWidth - 1));
+		}
+	}
 
 	printField();
 
