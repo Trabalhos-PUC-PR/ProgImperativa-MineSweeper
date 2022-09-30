@@ -7,7 +7,7 @@
 
 int main()
 {
-    printf("Hello World!\n");
+    allocateField(20, 20);
     printField();
     return 0;
 }
