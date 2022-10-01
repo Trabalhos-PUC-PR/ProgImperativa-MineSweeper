@@ -15,7 +15,10 @@ extern int fieldHeight;
 extern int totalPlacedBombs;
 
 void allocateField(int width, int height);
-void printField();
+void fieldPrint();
 enum boolean fieldSetBomb(int x, int y);
+enum boolean fieldRevealAt(int height, int width);
+void fieldRevealAll();
+void fieldSetRandomBombs(int total);
 
 #endif /* FIELD_H_ */
