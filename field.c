@@ -32,16 +32,64 @@ void allocateField(int width, int height) {
 }
 
 enum boolean fieldRevealAt(int height, int width) {
-	if (height < 0 || height >= fieldWidth) {
+	if (!fieldIsValidPos(height, width)) {
 		return false;
 	}
 	if (field[height][width].isFlagged) {
 		return false;
 	}
-	if (width < 0 || width >= fieldHeight) {
+	if (field[height][width].isRevealed) {
 		return false;
 	}
 	field[height][width].isRevealed = true;
+	if (field[height][width].number == 0)
+		fieldRevealEmptyField(height, width);
+	return true;
+}
+
+void fieldRevealEmptyField(int height, int width) {
+	// four cardinal directions
+	if (fieldIsValidPos(height, width - 1)) {
+		fieldRevealAt(height, width - 1);
+	}
+	if (fieldIsValidPos(height - 1, width)) {
+		fieldRevealAt(height - 1, width);
+	}
+	if (fieldIsValidPos(height, width + 1)) {
+		fieldRevealAt(height, width + 1);
+	}
+	if (fieldIsValidPos(height + 1, width)) {
+		fieldRevealAt(height + 1, width);
+	}
+
+	// diagonals, only if field.number != 0
+	if (fieldIsValidPos(height - 1, width - 1)
+			&& field[height - 1, width - 1] != 0) {
+		fieldRevealAt(height - 1, width - 1);
+	}
+	if (fieldIsValidPos(height - 1, width + 1)
+			&& field[height - 1, width + 1] != 0) {
+		fieldRevealAt(height - 1, width + 1);
+	}
+	if (fieldIsValidPos(height + 1, width - 1)
+			&& field[height + 1, width - 1] != 0) {
+		fieldRevealAt(height + 1, width - 1);
+	}
+	if (fieldIsValidPos(height + 1, width + 1)
+			&& field[height + 1, width + 1] != 0) {
+		fieldRevealAt(height + 1, width + 1);
+	}
+}
+
+enum boolean fieldIsValidPos(int height, int width) {
+	if (height < 0 || height >= fieldWidth) {
+		return false;
+	}
+
+	if (width < 0 || width >= fieldHeight) {
+		return false;
+	}
+
 	return true;
 }
 

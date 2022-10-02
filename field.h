@@ -20,5 +20,7 @@ enum boolean fieldSetBomb(int x, int y);
 enum boolean fieldRevealAt(int height, int width);
 void fieldRevealAll();
 void fieldSetRandomBombs(int total);
+void fieldRevealEmptyField(int height, int width);
+enum boolean fieldIsValidPos(int height, int width);
 
 #endif /* FIELD_H_ */

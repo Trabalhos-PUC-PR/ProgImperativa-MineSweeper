@@ -10,7 +10,7 @@ int main() {
 
 	fieldSetRandomBombs(5);
 
-	fieldRevealAll();
+	fieldRevealAt(0, 0);
 	fieldPrint();
 
 	return 0;
