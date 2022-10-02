@@ -5,6 +5,8 @@
 #include "square.h"
 #include "randomGen.h"
 
+enum boolean game = true;
+
 int fieldWidth = 0;
 int fieldHeight = 0;
 int totalBombs = 0;
@@ -43,7 +45,7 @@ enum boolean fieldRevealAt(int height, int width) {
 	if (field[height][width].isFlagged) {
 		return false;
 	}
-	if (field[height][width].isRevealed) {
+	if (field[height][width].isRevealed){
 		return false;
 	}
 	field[height][width].isRevealed = true;
@@ -79,6 +81,14 @@ enum boolean fieldSetFlagAt(int height, int width){
 	}
 	field[height][width].isFlagged = !field[height][width].isFlagged;
 	return true;
+}
+
+enum boolean fieldIsThisAFlag(int height, int width){
+	return field[height][width].isFlagged;
+}
+
+enum boolean fieldIsThisABomb(int height, int width){
+	return field[height][width].isBomb;
 }
 
 enum boolean fieldIsValidPos(int height, int width) {
@@ -119,16 +129,10 @@ void fieldSetRandomBombs(int total) {
  * Sets a bomb in given coordinate, returns false if its unable to set bomb
  */
 enum boolean fieldSetBomb(int height, int width) {
-	if (height < 0 || height >= fieldWidth) {
-		return false;
-	}
-	if (width < 0 || width >= fieldHeight) {
+	if (!fieldIsValidPos(height, width)) {
 		return false;
 	}
 	if (field[height][width].isBomb) {
-		return false;
-	}
-	if (field[height][width].isFlagged) {
 		return false;
 	}
 	field[height][width].isBomb = true;
@@ -157,8 +161,13 @@ enum boolean fieldSetBomb(int height, int width) {
  * @brief prints entire field on terminal
  */
 void fieldPrint() {
+	printf(" ");
+	for(int i = 0; i < fieldWidth; i++){
+		printf(" %d", i);
+	}
+	printf("\n");
 	for (int w = 0; w < fieldWidth; w++) {
-		printf("[");
+		printf("%d[", w);
 		for (int h = 0; h < fieldHeight; h++) {
 			if (field[w][h].isFlagged) {
 				printf("F");

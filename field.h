@@ -10,11 +10,13 @@
 
 #include "boolean.h"
 
+extern enum boolean game;
 extern int fieldWidth;
 extern int fieldHeight;
+extern int totalBombs;
+extern int totalSafeSquares;
 extern int totalFlaggedSquares;
 extern int totalSquaresRevealed;
-extern int totalSafeSquares;
 
 void allocateField(int width, int height);
 void fieldPrint();
@@ -25,5 +27,7 @@ void fieldSetRandomBombs(int total);
 void fieldRevealEmptyField(int height, int width);
 enum boolean fieldIsValidPos(int height, int width);
 enum boolean fieldSetFlagAt(int height, int width);
+enum boolean fieldIsThisABomb(int height, int width);
+int fieldGetSumOfNeighborFlagsAt(int height, int width);
 
 #endif /* FIELD_H_ */
