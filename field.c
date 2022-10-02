@@ -32,6 +32,12 @@ void allocateField(int width, int height) {
 	field = (struct Square**) malloc(width * sizeof(struct Square*));
 	for (int w = 0; w < width; w++) {
 		field[w] = malloc(sizeof(struct Square) * height);
+        for(int h = 0; h < height; h++){
+            field[w][h].number = 0;
+            field[w][h].isFlagged = false;
+            field[w][h].isRevealed = false;
+            field[w][h].isBomb = false;
+        }
 	}
 	fieldWidth = width;
 	fieldHeight = height;
@@ -114,8 +120,7 @@ void fieldRevealAll() {
 void fieldSetRandomBombs(int total) {
 	randomSetupSeed();
 	for (int i = 0; i < total; i++) {
-		enum boolean setted = fieldSetBomb(randomNum(fieldHeight - 1),
-				randomNum(fieldWidth - 1));
+		enum boolean setted = false;
 		while (setted == false) {
 			setted = fieldSetBomb(randomNum(fieldHeight - 1),
 					randomNum(fieldWidth - 1));
