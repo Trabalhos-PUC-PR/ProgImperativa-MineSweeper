@@ -62,3 +62,7 @@ dkms.conf
 .settings/
 Debug/
 *.iml
+
+# Cmake
+cmake-build-debug/
+CMakeLists.txt

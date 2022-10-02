@@ -27,6 +27,7 @@ void fieldSetRandomBombs(int total);
 void fieldRevealEmptyField(int height, int width);
 enum boolean fieldIsValidPos(int height, int width);
 enum boolean fieldSetFlagAt(int height, int width);
+enum boolean fieldIsThisAFlag(int height, int width);
 enum boolean fieldIsThisABomb(int height, int width);
 int fieldGetSumOfNeighborFlagsAt(int height, int width);
 

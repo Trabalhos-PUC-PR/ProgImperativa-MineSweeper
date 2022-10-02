@@ -1,7 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
 
 #include "field.h"
 #include "boolean.h"
@@ -12,28 +9,25 @@ int main() {
 	fieldPrint();
 	printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
 
-	enum choise {
-		flag = 0, mark = 1
-	} choise;
-
 	while (game) {
 		int width;
 		int height;
-		printf("type your choise (flag(0), mark(1)): ");
-		scanf("%d", &choise);
+        enum boolean choice;
+		printf("type your choice (flag(0), mark(1)): ");
+		scanf("%d", &choice);
 
-		printf("type the width (0-%d): ", fieldWidth - 1);
+		printf("type the x position (0-%d):", fieldWidth - 1);
 		scanf("%d", &width);
-		printf("type the height (0-%d): ", fieldHeight - 1);
+		printf("type the y position (0-%d):", fieldHeight - 1);
 		scanf("%d", &height);
-		if (choise == flag) {
+		if (choice == false) {
 			fieldSetFlagAt(height, width);
 		} else {
 			fieldRevealAt(height, width);
 		}
 		fieldPrint();
 		printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
-		if (choise == mark && !fieldIsThisAFlag(height, width) && fieldIsThisABomb(height, width)) {
+		if (choice == true && !fieldIsThisAFlag(height, width) && fieldIsThisABomb(height, width)) {
 			game = false;
 			fieldRevealAll();
 			printf("LOST THE GAME!\n");
@@ -44,6 +38,5 @@ int main() {
 			printf("WON THE GAME!\n");
 		}
 	}
-
 	return 0;
 }
