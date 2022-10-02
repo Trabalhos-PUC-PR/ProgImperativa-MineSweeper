@@ -7,7 +7,11 @@
 
 int fieldWidth = 0;
 int fieldHeight = 0;
-int totalPlacedBombs = 0;
+int totalBombs = 0;
+int totalSquares = 0;
+int totalSafeSquares = 0;
+int totalFlaggedSquares = 0;
+int totalSquaresRevealed = 0;
 struct Square **field;
 /**
  * @brief the separator that will be between squares on the game
@@ -29,6 +33,7 @@ void allocateField(int width, int height) {
 	}
 	fieldWidth = width;
 	fieldHeight = height;
+	totalSquares = width * height;
 }
 
 enum boolean fieldRevealAt(int height, int width) {
@@ -42,6 +47,7 @@ enum boolean fieldRevealAt(int height, int width) {
 		return false;
 	}
 	field[height][width].isRevealed = true;
+	totalSquaresRevealed++;
 	if (field[height][width].number == 0)
 		fieldRevealEmptyField(height, width);
 	return true;
@@ -49,36 +55,30 @@ enum boolean fieldRevealAt(int height, int width) {
 
 void fieldRevealEmptyField(int height, int width) {
 	// four cardinal directions
-	if (fieldIsValidPos(height, width - 1)) {
-		fieldRevealAt(height, width - 1);
-	}
-	if (fieldIsValidPos(height - 1, width)) {
-		fieldRevealAt(height - 1, width);
-	}
-	if (fieldIsValidPos(height, width + 1)) {
-		fieldRevealAt(height, width + 1);
-	}
-	if (fieldIsValidPos(height + 1, width)) {
-		fieldRevealAt(height + 1, width);
-	}
+	fieldRevealAt(height, width - 1);
+	fieldRevealAt(height - 1, width);
+	fieldRevealAt(height, width + 1);
+	fieldRevealAt(height + 1, width);
+	fieldRevealAt(height - 1, width - 1);
+	fieldRevealAt(height - 1, width + 1);
+	fieldRevealAt(height + 1, width - 1);
+	fieldRevealAt(height + 1, width + 1);
+}
 
-	// diagonals, only if field.number != 0
-	if (fieldIsValidPos(height - 1, width - 1)
-			&& field[height - 1, width - 1] != 0) {
-		fieldRevealAt(height - 1, width - 1);
+enum boolean fieldSetFlagAt(int height, int width){
+	if (!fieldIsValidPos(height, width)) {
+		return false;
 	}
-	if (fieldIsValidPos(height - 1, width + 1)
-			&& field[height - 1, width + 1] != 0) {
-		fieldRevealAt(height - 1, width + 1);
+	if (field[height][width].isRevealed) {
+		return false;
 	}
-	if (fieldIsValidPos(height + 1, width - 1)
-			&& field[height + 1, width - 1] != 0) {
-		fieldRevealAt(height + 1, width - 1);
+	if(field[height][width].isFlagged){
+		totalFlaggedSquares--;
+	}else{
+		totalFlaggedSquares++;
 	}
-	if (fieldIsValidPos(height + 1, width + 1)
-			&& field[height + 1, width + 1] != 0) {
-		fieldRevealAt(height + 1, width + 1);
-	}
+	field[height][width].isFlagged = !field[height][width].isFlagged;
+	return true;
 }
 
 enum boolean fieldIsValidPos(int height, int width) {
@@ -111,6 +111,8 @@ void fieldSetRandomBombs(int total) {
 					randomNum(fieldWidth - 1));
 		}
 	}
+	totalBombs = total;
+	totalSafeSquares = totalSquares - totalBombs;
 }
 
 /**
@@ -147,7 +149,7 @@ enum boolean fieldSetBomb(int height, int width) {
 	if (width - 1 >= 0)
 		field[height][width - 1].number += 1;
 
-	totalPlacedBombs++;
+	totalBombs++;
 	return true;
 }
 
