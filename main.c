@@ -1,13 +1,12 @@
 #include <stdio.h>
-
 #include "field.h"
 #include "boolean.h"
 
 int main() {
-	allocateField(5, 5);
-	fieldSetRandomBombs(3);
+	allocateField(9, 9);
+	fieldSetRandomBombs(5);
 	fieldPrint();
-	printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
+	printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
 
 	while (game) {
 		int width;
@@ -26,15 +25,19 @@ int main() {
 			fieldRevealAt(height, width);
 		}
 		fieldPrint();
-		printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
+		printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
 		if (choice == true && !fieldIsThisAFlag(height, width) && fieldIsThisABomb(height, width)) {
 			game = false;
 			fieldRevealAll();
+			fieldPrint();
+			printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
 			printf("LOST THE GAME!\n");
 		}
 		if (totalSafeSquares == totalSquaresRevealed) {
 			game = false;
 			fieldRevealAll();
+			fieldPrint();
+			printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
 			printf("WON THE GAME!\n");
 		}
 	}

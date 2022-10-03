@@ -32,29 +32,132 @@ void allocateField(int width, int height) {
 	field = (struct Square**) malloc(width * sizeof(struct Square*));
 	for (int w = 0; w < width; w++) {
 		field[w] = malloc(sizeof(struct Square) * height);
-        for(int h = 0; h < height; h++){
-            field[w][h].number = 0;
-            field[w][h].isFlagged = false;
-            field[w][h].isRevealed = false;
-            field[w][h].isBomb = false;
-        }
+		for (int h = 0; h < height; h++) {
+			field[w][h].number = 0;
+			field[w][h].isFlagged = false;
+			field[w][h].isRevealed = false;
+			field[w][h].isBomb = false;
+		}
 	}
 	fieldWidth = width;
 	fieldHeight = height;
 	totalSquares = width * height;
 }
 
+enum boolean fieldRevealAround(int height, int width) {
+	enum boolean continueGame = true;
+	if (fieldIsValidPos(height + 1, width)
+			&& !field[height + 1][width].isRevealed
+			&& !field[height + 1][width].isFlagged) {
+		field[height + 1][width].isRevealed = true;
+		if (field[height + 1][width].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height + 1, width + 1)
+			&& !field[height + 1][width + 1].isRevealed
+			&& !field[height + 1][width + 1].isFlagged) {
+		field[height + 1][width + 1].isRevealed = true;
+		if (field[height + 1][width + 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height + 1, width - 1)
+			&& !field[height + 1][width - 1].isRevealed
+			&& !field[height + 1][width - 1].isFlagged) {
+		field[height + 1][width - 1].isRevealed = true;
+		if (field[height + 1][width - 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height - 1, width)
+			&& !field[height - 1][width].isRevealed
+			&& !field[height - 1][width].isFlagged) {
+		field[height - 1][width].isRevealed = true;
+		if (field[height - 1][width].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height - 1, width + 1)
+			&& !field[height - 1][width + 1].isRevealed
+			&& !field[height - 1][width + 1].isFlagged) {
+		field[height - 1][width + 1].isRevealed = true;
+		if (field[height - 1][width + 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height - 1, width - 1)
+			&& !field[height - 1][width - 1].isRevealed
+			&& !field[height - 1][width - 1].isFlagged) {
+		field[height - 1][width - 1].isRevealed = true;
+		if (field[height - 1][width - 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height, width - 1)
+			&& !field[height][width - 1].isRevealed
+			&& !field[height][width - 1].isFlagged) {
+		field[height][width - 1].isRevealed = true;
+		if (field[height][width - 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+	}
+
+	if (fieldIsValidPos(height, width + 1)
+			&& !field[height][width + 1].isRevealed
+			&& !field[height][width + 1].isFlagged) {
+		field[height][width + 1].isRevealed = true;
+		if (field[height][width + 1].isBomb) {
+			continueGame = false;
+		} else {
+			totalSquaresRevealed++;
+		}
+
+	}
+	return continueGame;
+}
+
 enum boolean fieldRevealAt(int height, int width) {
 	if (!fieldIsValidPos(height, width)) {
-		return false;
+		return true;
 	}
 	if (field[height][width].isFlagged) {
-		return false;
+		return true;
 	}
-	if (field[height][width].isRevealed){
+	if (field[height][width].isRevealed) {
+		if (field[height][width].number == 0) {
+			return true;
+		}
+		int sum = fieldGetSumOfNeighborFlagsAt(height, width);
+		if (sum == field[height][width].number) {
+			return fieldRevealAround(height, width);
+		}
 		return false;
 	}
 	field[height][width].isRevealed = true;
+	if (field[height][width].isBomb) {
+		return false;
+	}
 	totalSquaresRevealed++;
 	if (field[height][width].number == 0)
 		fieldRevealEmptyField(height, width);
@@ -67,33 +170,34 @@ void fieldRevealEmptyField(int height, int width) {
 	fieldRevealAt(height - 1, width);
 	fieldRevealAt(height, width + 1);
 	fieldRevealAt(height + 1, width);
+	// diagonals
 	fieldRevealAt(height - 1, width - 1);
 	fieldRevealAt(height - 1, width + 1);
 	fieldRevealAt(height + 1, width - 1);
 	fieldRevealAt(height + 1, width + 1);
 }
 
-enum boolean fieldSetFlagAt(int height, int width){
+enum boolean fieldSetFlagAt(int height, int width) {
 	if (!fieldIsValidPos(height, width)) {
 		return false;
 	}
 	if (field[height][width].isRevealed) {
 		return false;
 	}
-	if(field[height][width].isFlagged){
+	if (field[height][width].isFlagged) {
 		totalFlaggedSquares--;
-	}else{
+	} else {
 		totalFlaggedSquares++;
 	}
 	field[height][width].isFlagged = !field[height][width].isFlagged;
 	return true;
 }
 
-enum boolean fieldIsThisAFlag(int height, int width){
+enum boolean fieldIsThisAFlag(int height, int width) {
 	return field[height][width].isFlagged;
 }
 
-enum boolean fieldIsThisABomb(int height, int width){
+enum boolean fieldIsThisABomb(int height, int width) {
 	return field[height][width].isBomb;
 }
 
@@ -115,6 +219,29 @@ void fieldRevealAll() {
 			field[h][w].isRevealed = true;
 		}
 	}
+}
+
+int fieldGetSumOfNeighborFlagsAt(int height, int width) {
+	int sum = 0;
+	if (fieldIsValidPos(height + 1, width))
+		sum += field[height + 1][width].isFlagged;
+	if (fieldIsValidPos(height + 1, width - 1))
+		sum += field[height + 1][width - 1].isFlagged;
+	if (fieldIsValidPos(height + 1, width + 1))
+		sum += field[height + 1][width + 1].isFlagged;
+
+	if (fieldIsValidPos(height - 1, width))
+		sum += field[height - 1][width].isFlagged;
+	if (fieldIsValidPos(height - 1, width + 1))
+		sum += field[height - 1][width + 1].isFlagged;
+	if (fieldIsValidPos(height - 1, width - 1))
+		sum += field[height - 1][width - 1].isFlagged;
+
+	if (fieldIsValidPos(height, width - 1))
+		sum += field[height][width - 1].isFlagged;
+	if (fieldIsValidPos(height, width + 1))
+		sum += field[height][width + 1].isFlagged;
+	return sum;
 }
 
 void fieldSetRandomBombs(int total) {
@@ -167,7 +294,7 @@ enum boolean fieldSetBomb(int height, int width) {
  */
 void fieldPrint() {
 	printf(" ");
-	for(int i = 0; i < fieldWidth; i++){
+	for (int i = 0; i < fieldWidth; i++) {
 		printf(" %d", i);
 	}
 	printf("\n");
