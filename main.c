@@ -8,6 +8,7 @@ void runGame();
 
 int main(int argc, char **argv){
     run(argc, argv);
+    runGame();
     return 0;
 }
 
