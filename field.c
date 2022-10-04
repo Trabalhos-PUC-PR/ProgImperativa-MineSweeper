@@ -24,19 +24,21 @@ char separator = '|';
  * @brief allocates a field with given height and width.
  * If any of the given measures are less than two, the field will be set as 2x2
  */
-void allocateField(int width, int height) {
+void allocateField(int height, int width) {
 	if (height <= 1 || width <= 1) {
 		height = 2;
 		width = 2;
 	}
-	field = (struct Square**) malloc(width * sizeof(struct Square*));
-	for (int w = 0; w < width; w++) {
-		field[w] = malloc(sizeof(struct Square) * height);
-		for (int h = 0; h < height; h++) {
-			field[w][h].number = 0;
-			field[w][h].isFlagged = false;
-			field[w][h].isRevealed = false;
-			field[w][h].isBomb = false;
+	field = (struct Square**) malloc(height * sizeof(struct Square*));
+	for (int h = 0; h < height; h++) {
+		field[h] = malloc(sizeof(struct Square) * width);
+		for (int w = 0; w < width; w++) {
+			field[h][w].number = 0;
+			field[h][w].isFlagged = false;
+			field[h][w].isRevealed = false;
+			field[h][w].isBomb = false;
+			field[h][w].yPos = h;
+			field[h][w].xPos = w;
 		}
 	}
 	fieldWidth = width;
@@ -45,96 +47,27 @@ void allocateField(int width, int height) {
 }
 
 enum boolean fieldRevealAround(int height, int width) {
-	enum boolean continueGame = true;
-	if (fieldIsValidPos(height + 1, width)
-			&& !field[height + 1][width].isRevealed
-			&& !field[height + 1][width].isFlagged) {
-		field[height + 1][width].isRevealed = true;
-		if (field[height + 1][width].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
+	int size = 8;
+	struct Square **squares = fieldGetNeighborSquares(height, width, &size);
+
+	for (int i = 0; i < size; i++) {
+		if (!squares[i]->isRevealed && !squares[i]->isFlagged) {
+			if (squares[i]->number == 0) {
+				fieldRevealEmptyField(squares[i]->yPos, squares[i]->xPos);
+			} else {
+				squares[i]->isRevealed = true;
+
+				if (squares[i]->isBomb) {
+					return false;
+				} else {
+					totalSquaresRevealed++;
+				}
+			}
 		}
 	}
+	free(squares);
 
-	if (fieldIsValidPos(height + 1, width + 1)
-			&& !field[height + 1][width + 1].isRevealed
-			&& !field[height + 1][width + 1].isFlagged) {
-		field[height + 1][width + 1].isRevealed = true;
-		if (field[height + 1][width + 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height + 1, width - 1)
-			&& !field[height + 1][width - 1].isRevealed
-			&& !field[height + 1][width - 1].isFlagged) {
-		field[height + 1][width - 1].isRevealed = true;
-		if (field[height + 1][width - 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height - 1, width)
-			&& !field[height - 1][width].isRevealed
-			&& !field[height - 1][width].isFlagged) {
-		field[height - 1][width].isRevealed = true;
-		if (field[height - 1][width].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height - 1, width + 1)
-			&& !field[height - 1][width + 1].isRevealed
-			&& !field[height - 1][width + 1].isFlagged) {
-		field[height - 1][width + 1].isRevealed = true;
-		if (field[height - 1][width + 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height - 1, width - 1)
-			&& !field[height - 1][width - 1].isRevealed
-			&& !field[height - 1][width - 1].isFlagged) {
-		field[height - 1][width - 1].isRevealed = true;
-		if (field[height - 1][width - 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height, width - 1)
-			&& !field[height][width - 1].isRevealed
-			&& !field[height][width - 1].isFlagged) {
-		field[height][width - 1].isRevealed = true;
-		if (field[height][width - 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-	}
-
-	if (fieldIsValidPos(height, width + 1)
-			&& !field[height][width + 1].isRevealed
-			&& !field[height][width + 1].isFlagged) {
-		field[height][width + 1].isRevealed = true;
-		if (field[height][width + 1].isBomb) {
-			continueGame = false;
-		} else {
-			totalSquaresRevealed++;
-		}
-
-	}
-	return continueGame;
+	return true;
 }
 
 enum boolean fieldRevealAt(int height, int width) {
@@ -202,11 +135,11 @@ enum boolean fieldIsThisABomb(int height, int width) {
 }
 
 enum boolean fieldIsValidPos(int height, int width) {
-	if (height < 0 || height >= fieldWidth) {
+	if (height < 0 || height >= fieldHeight) {
 		return false;
 	}
 
-	if (width < 0 || width >= fieldHeight) {
+	if (width < 0 || width >= fieldWidth) {
 		return false;
 	}
 
@@ -221,26 +154,60 @@ void fieldRevealAll() {
 	}
 }
 
+struct Square** fieldGetNeighborSquares(int height, int width, int *size) {
+
+	struct Square **neighbors = malloc(sizeof(struct Square) * *size);
+
+	int offsetW = 3;
+	int offsetH = 3;
+	int beginW = width - 1;
+	int beginH = height - 1;
+
+	if (beginW < 0) {
+		offsetW--;
+		beginW = width;
+	}
+	if (fieldWidth <= width + 1)
+		offsetW--;
+
+	if (beginH < 0) {
+		offsetH--;
+		beginH = height;
+	}
+	if (fieldHeight <= height + 1)
+		offsetH--;
+
+//	printf("OffsetW: %d|BeginW: %d|\nOffsetH: %d|BeginW: %d|\nfw: %d|fh: %d|\n", offsetW, beginW, offsetH, beginH, fieldWidth, fieldHeight);
+
+	int count = 0;
+	for (int h = beginH; h < offsetH + beginH; h++) {
+		for (int w = beginW; w < offsetW + beginW; w++) {
+			if (w != width || h != height) {
+				neighbors[count] = &field[h][w];
+				count++;
+			}
+		}
+	}
+	if (*size != count) {
+//		printf("\n\nchanging size from %d to %d\n\n", *size, count);
+		*size = count;
+		return realloc(neighbors, (sizeof(struct Square) * count));
+	}
+	return neighbors;
+}
+
 int fieldGetSumOfNeighborFlagsAt(int height, int width) {
 	int sum = 0;
-	if (fieldIsValidPos(height + 1, width))
-		sum += field[height + 1][width].isFlagged;
-	if (fieldIsValidPos(height + 1, width - 1))
-		sum += field[height + 1][width - 1].isFlagged;
-	if (fieldIsValidPos(height + 1, width + 1))
-		sum += field[height + 1][width + 1].isFlagged;
+	int size = 8;
+	struct Square **squares = fieldGetNeighborSquares(height, width, &size);
 
-	if (fieldIsValidPos(height - 1, width))
-		sum += field[height - 1][width].isFlagged;
-	if (fieldIsValidPos(height - 1, width + 1))
-		sum += field[height - 1][width + 1].isFlagged;
-	if (fieldIsValidPos(height - 1, width - 1))
-		sum += field[height - 1][width - 1].isFlagged;
+	for (int i = 0; i < size; i++) {
+		if (squares[i]->isFlagged) {
+			sum++;
+		}
+	}
 
-	if (fieldIsValidPos(height, width - 1))
-		sum += field[height][width - 1].isFlagged;
-	if (fieldIsValidPos(height, width + 1))
-		sum += field[height][width + 1].isFlagged;
+	free(squares);
 	return sum;
 }
 
@@ -267,25 +234,20 @@ enum boolean fieldSetBomb(int height, int width) {
 	if (field[height][width].isBomb) {
 		return false;
 	}
+
 	field[height][width].isBomb = true;
 	field[height][width].number = 9;
 
-	if (height - 1 >= 0) {
-		field[height - 1][width].number += 1;
-		field[height - 1][width + 1].number += 1;
-		field[height - 1][width - 1].number += 1;
+	int size = 8;
+
+	struct Square** neighbors = fieldGetNeighborSquares(height, width, &size);
+
+	for(int i = 0; i < size; i++){
+		neighbors[i]->number++;
 	}
-	if (height + 1 < fieldHeight) {
-		field[height + 1][width].number += 1;
-		field[height + 1][width + 1].number += 1;
-		field[height + 1][width - 1].number += 1;
-	}
-	if (width + 1 < fieldWidth)
-		field[height][width + 1].number += 1;
-	if (width - 1 >= 0)
-		field[height][width - 1].number += 1;
 
 	totalBombs++;
+	free(neighbors);
 	return true;
 }
 
@@ -298,20 +260,20 @@ void fieldPrint() {
 		printf(" %d", i);
 	}
 	printf("\n");
-	for (int w = 0; w < fieldWidth; w++) {
-		printf("%d[", w);
-		for (int h = 0; h < fieldHeight; h++) {
-			if (field[w][h].isFlagged) {
+	for (int h = 0; h < fieldHeight; h++) {
+		printf("%d[", h);
+		for (int w = 0; w < fieldWidth; w++) {
+			if (field[h][w].isFlagged) {
 				printf("F");
 			} else {
-				if (field[w][h].isRevealed) {
-					if (field[w][h].number >= 9) {
+				if (field[h][w].isRevealed) {
+					if (field[h][w].number >= 9) {
 						printf("x");
 					} else {
-						if (field[w][h].number == 0) {
+						if (field[h][w].number == 0) {
 							printf(" ");
 						} else {
-							printf("%d", field[w][h].number);
+							printf("%d", field[h][w].number);
 						}
 					}
 				} else {
@@ -319,7 +281,7 @@ void fieldPrint() {
 				}
 			}
 
-			if (h != fieldHeight - 1) {
+			if (w != fieldWidth - 1) {
 				printf("%c", separator);
 			} else {
 				printf("]\n");
