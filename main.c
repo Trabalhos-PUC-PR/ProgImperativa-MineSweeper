@@ -4,21 +4,21 @@
 
 int main() {
 	allocateField(9, 9);
-	fieldSetRandomBombs(5);
+	fieldSetRandomBombs(6);
 	fieldPrint();
 	printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
 
 	while (game) {
 		int width;
 		int height;
-        enum boolean choice;
+        int choice;
 		printf("type your choice (flag(0), mark(1)): ");
 		scanf("%d", &choice);
 
-		printf("type the x position (0-%d):", fieldWidth - 1);
-		scanf("%d", &width);
 		printf("type the y position (0-%d):", fieldHeight - 1);
 		scanf("%d", &height);
+		printf("type the x position (0-%d):", fieldWidth - 1);
+		scanf("%d", &width);
 		if (choice == false) {
 			fieldSetFlagAt(height, width);
 		} else {

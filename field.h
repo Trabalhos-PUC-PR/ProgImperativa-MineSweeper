@@ -31,5 +31,6 @@ enum boolean fieldIsThisAFlag(int height, int width);
 enum boolean fieldIsThisABomb(int height, int width);
 enum boolean fieldRevealAround(int height, int width);
 int fieldGetSumOfNeighborFlagsAt(int height, int width);
+struct Square** fieldGetNeighborSquares(int height, int width, int* size);
 
 #endif /* FIELD_H_ */

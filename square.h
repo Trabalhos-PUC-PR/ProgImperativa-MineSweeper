@@ -11,10 +11,12 @@
 #include "boolean.h"
 
 struct Square{
+	int number;
+	int xPos;
+	int yPos;
 	enum boolean isRevealed;
 	enum boolean isFlagged;
 	enum boolean isBomb;
-	int number;
 };
 
 #endif /* SQUARE_H_ */
