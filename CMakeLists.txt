@@ -21,5 +21,5 @@ add_executable(MineSweeper
         main.c
         randomGen.c
         randomGen.h
-        square.h)
+        square.h guiGenerator.c guiGenerator.h)
 

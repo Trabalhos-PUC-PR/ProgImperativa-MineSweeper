@@ -2,45 +2,32 @@
 
 #include "field.h"
 #include "boolean.h"
-#include "gtk/gtk.h"
+#include "guiGenerator.h"
 
-int main(int argc, char **argv) {
-    GtkWidget *window;
-    gtk_init(&argc, &argv);
-
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-    gtk_widget_show_all(window);
-    gtk_main();
-	return 0;
+int main(int argc, char **argv){
+    run(argc, argv);
 }
 
 void runGame(){
-    allocateField(5, 5);
-    fieldSetRandomBombs(3);
-    fieldPrint();
-    printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
-
     while (game) {
-        int width;
-        int height;
         enum boolean choice;
         printf("type your choice (flag(0), mark(1)): ");
         scanf("%d", &choice);
 
+        int x;
+        int y;
         printf("type the x position (0-%d):", fieldWidth - 1);
-        scanf("%d", &width);
+        scanf("%d", &x);
         printf("type the y position (0-%d):", fieldHeight - 1);
-        scanf("%d", &height);
+        scanf("%d", &y);
         if (choice == false) {
-            fieldSetFlagAt(height, width);
+            fieldSetFlagAt(y, x);
         } else {
-            fieldRevealAt(height, width);
+            fieldRevealAt(y, x);
         }
         fieldPrint();
         printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
-        if (choice == true && !fieldIsThisAFlag(height, width) && fieldIsThisABomb(height, width)) {
+        if (choice == true && !fieldIsThisAFlag(y, x) && fieldIsThisABomb(y, x)) {
             game = false;
             fieldRevealAll();
             printf("LOST THE GAME!\n");
