@@ -45,7 +45,6 @@ static gboolean square_on_clicked(GtkWidget *eventBox, GdkEventButton *event, gp
 }
 
 void run(int argc, char **argv) {
-    loadGame();
     GtkWidget *window;
     gtk_init(&argc, &argv);
 
