@@ -5,11 +5,22 @@
 #include "guiGenerator.h"
 
 void runGame();
+void loadGame();
 
 int main(int argc, char **argv){
-    run(argc, argv);
+    loadGame();
+    //run(argc, argv);
     runGame();
     return 0;
+}
+
+void loadGame(){
+    fieldWidth = 5;
+    fieldHeight = 5;
+    totalBombs = 5;
+    allocateField(fieldWidth, fieldHeight);
+    fieldSetRandomBombs(totalBombs);
+    fieldPrint();
 }
 
 void runGame(){

@@ -19,14 +19,6 @@ double square_pressed_rgb[] = {0.5, 0.5, 0.5};
 
 double square_spacing = 1.0;
 
-void loadGame(){
-    fieldWidth = 5;
-    fieldHeight = 5;
-    allocateField(fieldWidth, fieldHeight);
-    fieldSetRandomBombs(totalBombs);
-    fieldPrint();
-}
-
 void draw_rect(cairo_t *cr){
     cairo_set_source_rgb(cr, square_stroke_rgb[0], square_stroke_rgb[1], square_stroke_rgb[2]);
     cairo_set_line_width(cr, square_stroke_width);
