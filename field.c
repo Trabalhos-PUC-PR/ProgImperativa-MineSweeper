@@ -5,8 +5,6 @@
 #include "square.h"
 #include "randomGen.h"
 
-enum boolean game = true;
-
 int fieldWidth = 0;
 int fieldHeight = 0;
 int totalBombs = 0;

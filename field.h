@@ -10,7 +10,6 @@
 
 #include "boolean.h"
 
-extern enum boolean game;
 extern int fieldWidth;
 extern int fieldHeight;
 extern int totalBombs;

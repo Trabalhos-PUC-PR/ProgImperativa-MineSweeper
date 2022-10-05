@@ -7,6 +7,8 @@
 void runGame();
 void loadGame();
 
+enum boolean game = true;
+
 int main(int argc, char **argv){
     loadGame();
     run(argc, argv);
