@@ -48,6 +48,18 @@ void allocateField(int height, int width) {
     totalSquares = width * height;
 }
 
+void fieldResizeField(int height, int width){
+    for(int h = 0; h < fieldHeight; h++){
+        free(field[h]);
+    }
+    free(field);
+    totalBombs = 0;
+    totalSafeSquares = 0;
+    totalFlaggedSquares = 0;
+    totalSquaresRevealed = 0;
+    allocateField(height, width);
+}
+
 enum boolean fieldRevealAround(int height, int width) {
     int size = 8;
     struct Square **squares = fieldGetNeighborSquares(height, width, &size);
@@ -67,9 +79,6 @@ enum boolean fieldRevealAround(int height, int width) {
             }
         }
     }
-//    for (int i = 0; i < size; i++) {
-//        free(squares[i]);
-//    }
     free(squares);
 
     return true;
@@ -180,6 +189,7 @@ void fieldResetField(){
             field[h][w].isRevealed = false;
             field[h][w].isFlagged = false;
             field[h][w].isBomb = false;
+            field[h][w].areThereTooManyFlags = false;
             field[h][w].number = 0;
         }
     }
@@ -239,15 +249,13 @@ int fieldGetSumOfNeighborFlagsAt(int height, int width) {
         }
     }
 
-//    for (int i = 0; i < size; i++) {
-//        free(&squares[i]);
-//    }
-
     free(squares);
     return sum;
 }
 
-void fieldSetRandomBombs(int total) {
+enum boolean fieldSetRandomBombs(int total) {
+    if(total >= fieldWidth * fieldHeight)
+        return 0;
     randomSetupSeed();
     for (int i = 0; i < total; i++) {
         enum boolean setted = false;
@@ -258,6 +266,7 @@ void fieldSetRandomBombs(int total) {
     }
     totalBombs = total;
     totalSafeSquares = totalSquares - totalBombs;
+    return true;
 }
 
 /**
@@ -283,10 +292,6 @@ enum boolean fieldSetBomb(int height, int width) {
     }
 
     totalBombs++;
-
-//    for (int i = 0; i < size; i++) {
-//        free(&neighbors[i]);
-//    }
 
     free(neighbors);
     return true;

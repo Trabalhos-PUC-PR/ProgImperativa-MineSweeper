@@ -9,7 +9,7 @@ void loadGame();
 
 int main(int argc, char **argv){
     loadGame();
-    run(argc, argv);
+    //    run(argc, argv);
     runGame();
     return 0;
 }
@@ -26,7 +26,7 @@ void loadGame(){
 void runGame(){
     while (game) {
         enum boolean choice;
-        printf("type your choice (flag(0), mark(1)): ");
+        printf("type your choice (flag(0), mark(1), resize(2)): ");
         scanf("%d", &choice);
 
         int x;
@@ -35,14 +35,18 @@ void runGame(){
         scanf("%d", &x);
         printf("type the y position (0-%d):", fieldHeight - 1);
         scanf("%d", &y);
-        if (choice == false) {
+        if (choice == 0) {
             fieldSetFlagAt(y, x);
         } else {
-            game = fieldRevealAt(y, x);
+            if(choice == 1) {
+                game = fieldRevealAt(y, x);
+            }else{
+                fieldResizeField(y, x);
+                fieldSetRandomBombs(y*x/3);
+            }
         }
         fieldPrint();
         printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
-        printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
         if (!game || choice == true && !fieldIsThisAFlag(y, x) && fieldIsThisABomb(y, x)) {
             game = false;
             fieldRevealAll();
