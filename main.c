@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 
 #include "field.h"
 #include "boolean.h"
@@ -8,18 +9,21 @@ void runGame();
 void loadGame();
 
 enum boolean game = true;
+int startTime;
+int endTime;
 
 int main(int argc, char **argv){
     loadGame();
-    run(argc, argv);
-//    runGame();
+//    run(argc, argv);
+    runGame();
     return 0;
 }
 
 void loadGame(){
     fieldWidth = 9;
     fieldHeight = 9;
-    totalBombs = 72;
+    totalBombs = 20;
+    startTime = time(NULL);
     allocateField(fieldWidth, fieldHeight);
     fieldPrint();
 }
@@ -27,7 +31,7 @@ void loadGame(){
 void runGame(){
     while (game) {
         enum boolean choice;
-        printf("type your choice (flag(0), mark(1), resize(2)): ");
+        printf("type your choice (flag(0), mark(1)): ");
         scanf("%d", &choice);
 
         int x;
@@ -39,11 +43,11 @@ void runGame(){
         if (choice == 0) {
             fieldSetFlagAt(y, x);
         } else {
-            if(choice == 1) {
+            if(totalSquaresRevealed==0){
+                fieldFirstClick(y, x);
                 game = fieldRevealAt(y, x);
             }else{
-                fieldResizeField(y, x);
-                fieldSetRandomBombs(y*x/3, 0, 0);
+                game = fieldRevealAt(y, x);
             }
         }
         fieldPrint();
@@ -61,4 +65,9 @@ void runGame(){
             printf("WON THE GAME!\n");
         }
     }
+    endTime = time(NULL);
+    int seconds = endTime - startTime;
+    int minutes = seconds/60;
+    seconds = seconds % 60;
+    printf("Elapsed: %02d:%02ds\n",minutes, seconds);
 }

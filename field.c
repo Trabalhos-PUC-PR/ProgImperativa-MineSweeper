@@ -125,6 +125,9 @@ enum boolean fieldSetFlagAt(int height, int width) {
     if (field[height][width].isRevealed) {
         return false;
     }
+    if (totalSquaresRevealed == 0) {
+        return false;
+    }
     if (field[height][width].isFlagged) {
         totalFlaggedSquares--;
     } else {
@@ -255,7 +258,7 @@ void fieldFirstClick(int y, int x){
 }
 
 enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWidth) {
-    if(total >= fieldWidth * fieldHeight)
+    if(total > fieldWidth * fieldHeight-9)
         return 0;
     randomSetupSeed();
 
@@ -278,7 +281,7 @@ enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWi
                 }
             }
             if(canPlaceBomb){
-                printf("placing bomb at %d, %d\n", bombHeightPos, bombWidthPos);
+//                printf("placing bomb at %d, %d\n", bombHeightPos, bombWidthPos);
                 setted = fieldSetBomb(bombHeightPos, bombWidthPos);
             }
         }
