@@ -5,8 +5,6 @@
 #include "square.h"
 #include "randomGen.h"
 
-enum boolean game = true;
-
 int fieldWidth = 0;
 int fieldHeight = 0;
 int totalBombs = 0;
@@ -252,9 +250,8 @@ int fieldGetSumOfNeighborFlagsAt(int height, int width) {
     return sum;
 }
 
-void fieldFirstClick(int height, int width){
-    fieldSetRandomBombs(totalBombs, height, width);
-    fieldRevealAt(height, width);
+void fieldFirstClick(int y, int x){
+    fieldSetRandomBombs(totalBombs, y, x);
 }
 
 enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWidth) {
@@ -264,20 +261,26 @@ enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWi
 
     int size = 8;
     struct Square** squares = fieldGetNeighborSquares(protectedHeight, protectedWidth, &size);
-
     for (int i = 0; i < total; i++) {
         enum boolean setted = false;
         while (setted == false ) {
             int bombHeightPos = randomNum(fieldHeight - 1);
             int bombWidthPos = randomNum(fieldWidth - 1);
             enum boolean canPlaceBomb = true;
-            for(int i = 0; i < size; i++){
-                if(squares[i]->xPos == bombWidthPos && squares[i]->yPos == bombHeightPos){
-                    canPlaceBomb = false;
+            if(protectedWidth == bombWidthPos && protectedHeight == bombHeightPos){
+                canPlaceBomb=false;
+            }else{
+                for(int j = 0; j < size; j++){
+                    if(squares[j]->xPos == bombWidthPos && squares[j]->yPos == bombHeightPos){
+                        canPlaceBomb = false;
+                        break;
+                    }
                 }
             }
-            if(canPlaceBomb)
+            if(canPlaceBomb){
+                printf("placing bomb at %d, %d\n", bombHeightPos, bombWidthPos);
                 setted = fieldSetBomb(bombHeightPos, bombWidthPos);
+            }
         }
     }
     totalBombs = total;

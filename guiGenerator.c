@@ -10,6 +10,7 @@
 
 GtkWidget *game_matrix;
 GtkWidget *window;
+gboolean gameActive;
 
 int square_width = 25;
 int square_height = 25;
@@ -79,12 +80,14 @@ static gboolean on_square_draw_event(GtkWidget *widget, cairo_t *cr, struct Squa
 
 static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpointer data){
     struct Square *square = (struct Square *)data;
-    gboolean continueGame;
-    g_print("vai printar\n");
+    g_print("%d\n", totalSquaresRevealed);
+    g_print("%d %d\n", square->yPos, square->xPos);
+    if(totalSquaresRevealed == 0){
+        fieldFirstClick(square->yPos, square->xPos);
+    }
+    gboolean continueGame = TRUE;
     if(event->button == 1){
-        g_print("printou\n");
         continueGame = fieldRevealAt(square->yPos, square->xPos);
-        g_print("nao crashou\n");
     }else{
         fieldSetFlagAt(square->yPos, square->xPos);
     }
@@ -101,6 +104,8 @@ static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpoi
     }else{
         // TODO
         g_print("\nPERDEU");
+        //gameActive = FALSE;
+        return FALSE;
     }
     return TRUE;
 }
@@ -136,6 +141,7 @@ void newBoard(GtkWidget *parent){
             struct Square *square;
             square = &field[j][i];
             g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), square);
+            gameActive = TRUE;
         }
     }
 }

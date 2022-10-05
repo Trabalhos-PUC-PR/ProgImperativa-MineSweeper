@@ -7,6 +7,8 @@
 void runGame();
 void loadGame();
 
+enum boolean game = true;
+
 int main(int argc, char **argv){
     loadGame();
     run(argc, argv);
@@ -17,7 +19,7 @@ int main(int argc, char **argv){
 void loadGame(){
     fieldWidth = 9;
     fieldHeight = 9;
-    totalBombs = 5;
+    totalBombs = 72;
     allocateField(fieldWidth, fieldHeight);
     fieldPrint();
 }
@@ -41,7 +43,7 @@ void runGame(){
                 game = fieldRevealAt(y, x);
             }else{
                 fieldResizeField(y, x);
-                fieldSetRandomBombs(y*x/3);
+                fieldSetRandomBombs(y*x/3, 0, 0);
             }
         }
         fieldPrint();
