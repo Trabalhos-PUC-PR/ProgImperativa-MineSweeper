@@ -41,15 +41,18 @@ void runGame(){
             fieldRevealAt(y, x);
         }
         fieldPrint();
+        printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
         printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
         if (choice == true && !fieldIsThisAFlag(y, x) && fieldIsThisABomb(y, x)) {
             game = false;
             fieldRevealAll();
+            fieldPrint();
             printf("LOST THE GAME!\n");
         }
         if (totalSafeSquares == totalSquaresRevealed) {
             game = false;
             fieldRevealAll();
+            fieldPrint();
             printf("WON THE GAME!\n");
         }
     }

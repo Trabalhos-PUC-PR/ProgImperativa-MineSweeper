@@ -154,6 +154,17 @@ void fieldRevealAll() {
 	}
 }
 
+void fieldResetField(){
+    for (int h = 0; h < fieldHeight; h++) {
+        for (int w = 0; w < fieldWidth; w++) {
+            field[h][w].isRevealed = false;
+            field[h][w].isFlagged = false;
+            field[h][w].isBomb = false;
+            field[h][w].number = 0;
+        }
+    }
+}
+
 struct Square** fieldGetNeighborSquares(int height, int width, int *size) {
 
 	struct Square **neighbors = malloc(sizeof(struct Square) * *size);
