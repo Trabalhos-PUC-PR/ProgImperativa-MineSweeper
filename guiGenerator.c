@@ -91,11 +91,13 @@ static gboolean on_square_draw_event(GtkWidget *widget, cairo_t *cr, struct Squa
     return FALSE;
 }
 
-static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, struct Clickable_shape_Holder clickableShapeHolder){
+static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpointer data){
+    struct Square *square = (struct Square *)data;
     if(event->button == 1){ // botao esquerdo do mouse == 1
-        fieldRevealAt(clickableShapeHolder.square->yPos, clickableShapeHolder.square->xPos);
+        g_print("%d %d\n", square->xPos, square->yPos);
+        fieldRevealAt(square->yPos, square->xPos);
     }else{ // botao direito do mouse == 3
-        fieldSetFlagAt(clickableShapeHolder.square->yPos, clickableShapeHolder.square->xPos);
+        fieldSetFlagAt(square->yPos, square->xPos);
     }
 
     GtkWidget *text;
@@ -103,15 +105,14 @@ static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, stru
     text = gtk_text_view_new();
     buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
     gtk_text_buffer_set_text(buffer, " ", -1);
-    if(clickableShapeHolder.square->yPos > 0){
-        gtk_text_buffer_set_text(buffer, g_strdup_printf("%d", clickableShapeHolder.square->number), -1);
+    if(square->yPos > 0){
+        gtk_text_buffer_set_text(buffer, g_strdup_printf("%d", square->number), -1);
     }
-
-    fieldPrint();
+    //fieldPrint();
 
     gtk_widget_queue_draw(game_matrix);
 
-    int gameState = checkGameEnd(*clickableShapeHolder.square);
+    int gameState = checkGameEnd(*square);
     if(gameState == 1){
         // TODO : mensagem de parabens
     }else if(gameState == 2){
@@ -151,11 +152,11 @@ void newBoard(GtkWidget *parent){
             gtk_container_add(GTK_CONTAINER(eventBox), drawingArea);
             g_signal_connect (G_OBJECT(drawingArea), "draw", G_CALLBACK(on_square_draw_event), &field[j][i]);
 
-            struct Clickable_shape_Holder *clickableShapeHolder = g_malloc0(sizeof(struct Clickable_shape_Holder));
-            clickableShapeHolder->square = &field[j][i];
-            clickableShapeHolder->overlayContainer = NULL;
+            g_print("%d %d\n", field[j][i].xPos, field[j][i].yPos);
+            struct Square *square = g_malloc0(sizeof(struct Square));
+            square = &field[j][i];
             // criar evento pra quando sair o click
-            g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), clickableShapeHolder);
+            g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), square);
         }
     }
 }
