@@ -96,7 +96,7 @@ enum boolean fieldRevealAt(int height, int width) {
         if (sum == field[height][width].number) {
             return fieldRevealAround(height, width);
         }
-        return false;
+        return true;
     }
     field[height][width].isRevealed = true;
     if (field[height][width].isBomb) {
