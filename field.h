@@ -21,6 +21,7 @@ extern struct Square **field;
 
 void fieldPrint();
 void fieldRevealAll();
+void fieldResetField();
 void fieldSetRandomBombs(int total);
 enum boolean fieldSetBomb(int x, int y);
 void allocateField(int width, int height);
