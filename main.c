@@ -17,7 +17,7 @@ int main(int argc, char **argv){
 void loadGame(){
     fieldWidth = 9;
     fieldHeight = 9;
-    totalBombs = 10;
+    totalBombs = 20;
     allocateField(fieldWidth, fieldHeight);
     fieldSetRandomBombs(totalBombs);
     fieldPrint();
