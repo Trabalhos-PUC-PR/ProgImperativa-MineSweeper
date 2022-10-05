@@ -80,11 +80,8 @@ static gboolean on_square_draw_event(GtkWidget *widget, cairo_t *cr, struct Squa
 static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpointer data){
     struct Square *square = (struct Square *)data;
     gboolean continueGame;
-    g_print("vai printar\n");
     if(event->button == 1){
-        g_print("printou\n");
         continueGame = fieldRevealAt(square->yPos, square->xPos);
-        g_print("nao crashou\n");
     }else{
         fieldSetFlagAt(square->yPos, square->xPos);
     }
