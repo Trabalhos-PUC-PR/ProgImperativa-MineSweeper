@@ -23,7 +23,6 @@ void fieldRevealAll();
 void fieldResetField();
 enum boolean fieldSetBomb(int x, int y);
 void allocateField(int width, int height);
-enum boolean fieldSetRandomBombs(int total);
 void fieldResizeField(int height, int width);
 enum boolean fieldRevealAt(int height, int width);
 void fieldRevealEmptyField(int height, int width);
@@ -34,5 +33,6 @@ enum boolean fieldIsThisABomb(int height, int width);
 enum boolean fieldRevealAround(int height, int width);
 int fieldGetSumOfNeighborFlagsAt(int height, int width);
 struct Square** fieldGetNeighborSquares(int height, int width, int* size);
+enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWidth);
 
 #endif /* FIELD_H_ */

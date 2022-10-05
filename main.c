@@ -12,16 +12,15 @@ enum boolean game = true;
 int main(int argc, char **argv){
     loadGame();
     run(argc, argv);
-    runGame();
+//    runGame();
     return 0;
 }
 
 void loadGame(){
     fieldWidth = 9;
     fieldHeight = 9;
-    totalBombs = 20;
+    totalBombs = 5;
     allocateField(fieldWidth, fieldHeight);
-    fieldSetRandomBombs(totalBombs);
     fieldPrint();
 }
 
