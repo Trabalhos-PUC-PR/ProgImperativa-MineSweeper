@@ -15,6 +15,7 @@ int totalSafeSquares = 0;
 int totalFlaggedSquares = 0;
 int totalSquaresRevealed = 0;
 struct Square **field;
+
 /**
  * @brief the separator that will be between squares on the game
  */

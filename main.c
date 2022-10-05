@@ -9,7 +9,7 @@ void loadGame();
 
 int main(int argc, char **argv){
     loadGame();
-    //run(argc, argv);
+    run(argc, argv);
     runGame();
     return 0;
 }
@@ -17,7 +17,7 @@ int main(int argc, char **argv){
 void loadGame(){
     fieldWidth = 5;
     fieldHeight = 5;
-    totalBombs = 5;
+    totalBombs = 2;
     allocateField(fieldWidth, fieldHeight);
     fieldSetRandomBombs(totalBombs);
     fieldPrint();
