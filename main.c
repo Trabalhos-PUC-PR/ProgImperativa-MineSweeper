@@ -9,7 +9,7 @@ void loadGame();
 
 int main(int argc, char **argv){
     loadGame();
-    //    run(argc, argv);
+    run(argc, argv);
     runGame();
     return 0;
 }
