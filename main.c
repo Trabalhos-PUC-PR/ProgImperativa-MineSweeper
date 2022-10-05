@@ -15,7 +15,6 @@ int main(int argc, char **argv){
 }
 
 void loadGame(){
-=======
     fieldWidth = 9;
     fieldHeight = 9;
     totalBombs = 10;
