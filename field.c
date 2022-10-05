@@ -32,13 +32,8 @@ void allocateField(int height, int width) {
     }
     field = (struct Square**) malloc(height * sizeof(struct Square*));
     for (int h = 0; h < height; h++) {
-        field[h] = malloc(sizeof(struct Square) * width);
+        field[h] = calloc(width, sizeof(struct Square));
         for (int w = 0; w < width; w++) {
-            field[h][w].number = 0;
-            field[h][w].isFlagged = false;
-            field[h][w].isRevealed = false;
-            field[h][w].isBomb = false;
-            field[h][w].areThereTooManyFlags = false;
             field[h][w].yPos = h;
             field[h][w].xPos = w;
         }
@@ -64,15 +59,17 @@ enum boolean fieldRevealAround(int height, int width) {
     int size = 8;
     struct Square **squares = fieldGetNeighborSquares(height, width, &size);
 
+    enum boolean result = true;
+
     for (int i = 0; i < size; i++) {
         if (!squares[i]->isRevealed && !squares[i]->isFlagged) {
             if (squares[i]->number == 0) {
-                fieldRevealEmptyField(squares[i]->yPos, squares[i]->xPos);
+                fieldRevealAt(squares[i]->yPos, squares[i]->xPos);
             } else {
                 squares[i]->isRevealed = true;
 
                 if (squares[i]->isBomb) {
-                    return false;
+                    result = false;
                 } else {
                     totalSquaresRevealed++;
                 }
@@ -81,7 +78,7 @@ enum boolean fieldRevealAround(int height, int width) {
     }
     free(squares);
 
-    return true;
+    return result;
 }
 
 enum boolean fieldRevealAt(int height, int width) {
@@ -143,10 +140,10 @@ enum boolean fieldSetFlagAt(int height, int width) {
     for(int i = 0; i < size; i++){
         if(squares[i]->isRevealed){
             if(squares[i]->number < fieldGetSumOfNeighborFlagsAt(squares[i]->yPos, squares[i]->xPos)){
-                printf("too many flags for [%d][%d]\n", squares[i]->yPos, squares[i]->xPos);
+//                printf("too many flags for [%d][%d]\n", squares[i]->yPos, squares[i]->xPos);
                 squares[i]->areThereTooManyFlags = true;
             }else{
-                printf("ok flags for [%d][%d]\n", squares[i]->yPos, squares[i]->xPos);
+//                printf("ok flags for [%d][%d]\n", squares[i]->yPos, squares[i]->xPos);
                 squares[i]->areThereTooManyFlags = false;
             }
         }
@@ -193,6 +190,10 @@ void fieldResetField(){
             field[h][w].number = 0;
         }
     }
+    totalBombs = 0;
+    totalSafeSquares = 0;
+    totalFlaggedSquares = 0;
+    totalSquaresRevealed = 0;
 }
 
 struct Square** fieldGetNeighborSquares(int height, int width, int *size) {
