@@ -17,6 +17,7 @@ extern int totalBombs;
 extern int totalSafeSquares;
 extern int totalFlaggedSquares;
 extern int totalSquaresRevealed;
+extern struct Square **field;
 
 void fieldPrint();
 void fieldRevealAll();
