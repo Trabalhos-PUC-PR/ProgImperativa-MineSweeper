@@ -48,7 +48,6 @@ void fieldResizeField(int height, int width){
         free(field[h]);
     }
     free(field);
-    totalBombs = 0;
     totalSafeSquares = 0;
     totalFlaggedSquares = 0;
     totalSquaresRevealed = 0;
@@ -190,7 +189,6 @@ void fieldResetField(){
             field[h][w].number = 0;
         }
     }
-    totalBombs = 0;
     totalSafeSquares = 0;
     totalFlaggedSquares = 0;
     totalSquaresRevealed = 0;
@@ -254,15 +252,32 @@ int fieldGetSumOfNeighborFlagsAt(int height, int width) {
     return sum;
 }
 
-enum boolean fieldSetRandomBombs(int total) {
+void fieldFirstClick(int height, int width){
+    fieldSetRandomBombs(totalBombs, height, width);
+    fieldRevealAt(height, width);
+}
+
+enum boolean fieldSetRandomBombs(int total, int protectedHeight, int protectedWidth) {
     if(total >= fieldWidth * fieldHeight)
         return 0;
     randomSetupSeed();
+
+    int size = 8;
+    struct Square** squares = fieldGetNeighborSquares(protectedHeight, protectedWidth, &size);
+
     for (int i = 0; i < total; i++) {
         enum boolean setted = false;
-        while (setted == false) {
-            setted = fieldSetBomb(randomNum(fieldHeight - 1),
-                                  randomNum(fieldWidth - 1));
+        while (setted == false ) {
+            int bombHeightPos = randomNum(fieldHeight - 1);
+            int bombWidthPos = randomNum(fieldWidth - 1);
+            enum boolean canPlaceBomb = true;
+            for(int i = 0; i < size; i++){
+                if(squares[i]->xPos == bombWidthPos && squares[i]->yPos == bombHeightPos){
+                    canPlaceBomb = false;
+                }
+            }
+            if(canPlaceBomb)
+                setted = fieldSetBomb(bombHeightPos, bombWidthPos);
         }
     }
     totalBombs = total;
