@@ -8,8 +8,8 @@
 #include "field.h"
 #include "square.h"
 
-GtkWidget *window;
 GtkWidget *game_matrix;
+GtkWidget *window;
 
 int square_width = 25;
 int square_height = 25;
@@ -28,11 +28,29 @@ double square_bombed_inner_rgb[] = {0.0, 0.0, 0.0}; // temporario
 // deixei assim mesmo pra ficar facil de mudar caso querer
 
 char bombNumberTextColor[8][256] = {"blue", "green", "yellow", "purple", "red", "darkred", "black", "gray"};
+// tem uma funcao do gdk que faz parse disso
 
 struct Clickable_shape_Holder{
     struct Square *square;
     GtkWidget *overlayContainer;
 };
+
+void newBoard(GtkWidget *parent);
+
+// sem enum pra isso
+// 0 = continua o jogo
+// 1 = vitoria
+// 2 = derrota
+
+int checkGameEnd(struct Square pressedSquare){
+    if(pressedSquare.isBomb){
+        return 2;
+    }
+    if(totalSafeSquares == totalSquaresRevealed){
+        return 1;
+    }
+    return 0;
+}
 
 void draw_rect(cairo_t *cr, struct Square square){
 
@@ -73,8 +91,12 @@ static gboolean on_square_draw_event(GtkWidget *widget, cairo_t *cr, struct Squa
     return FALSE;
 }
 
-static gboolean square_on_release(GtkWidget *eventBox, GdkEventButton *event, struct Clickable_shape_Holder clickableShapeHolder){
-    fieldRevealAt(clickableShapeHolder.square->yPos, clickableShapeHolder.square->xPos);
+static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, struct Clickable_shape_Holder clickableShapeHolder){
+    if(event->button == 1){ // botao esquerdo do mouse == 1
+        fieldRevealAt(clickableShapeHolder.square->yPos, clickableShapeHolder.square->xPos);
+    }else{ // botao direito do mouse == 3
+        fieldSetFlagAt(clickableShapeHolder.square->yPos, clickableShapeHolder.square->xPos);
+    }
 
     GtkWidget *text;
     GtkTextBuffer *buffer;
@@ -88,17 +110,25 @@ static gboolean square_on_release(GtkWidget *eventBox, GdkEventButton *event, st
     fieldPrint();
 
     gtk_widget_queue_draw(game_matrix);
+
+    int gameState = checkGameEnd(*clickableShapeHolder.square);
+    if(gameState == 1){
+        // TODO : mensagem de parabens
+    }else if(gameState == 2){
+        // TODO : mensagem de derrota
+        //newBoard(gtk_widget_get_parent(eventBox));
+    }
     return TRUE;
 }
 
-void run(int argc, char **argv) {
-    gtk_init(&argc, &argv);
-
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
+void newBoard(GtkWidget *parent){
     game_matrix = gtk_grid_new();
-    gtk_container_add(GTK_CONTAINER(window), game_matrix);
+
+    gtk_widget_destroy(GTK_WIDGET(game_matrix));
+
+    gtk_widget_queue_draw(game_matrix);
+
+    gtk_container_add(GTK_CONTAINER(parent), game_matrix);
     gtk_widget_set_margin_start(game_matrix, matrix_margin);
     gtk_widget_set_margin_top(game_matrix, matrix_margin);
     gtk_widget_set_margin_end(game_matrix, matrix_margin);
@@ -125,9 +155,23 @@ void run(int argc, char **argv) {
             clickableShapeHolder->square = &field[j][i];
             clickableShapeHolder->overlayContainer = NULL;
             // criar evento pra quando sair o click
-            g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_release), clickableShapeHolder);
+            g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), clickableShapeHolder);
         }
     }
+}
+
+void run(int argc, char **argv) {
+    gtk_init(&argc, &argv);
+
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+
+    GtkWidget *fixed;
+    fixed = gtk_fixed_new(); // cria um container pra guardar a matriz, ao inves de so colocar ela direto no top view
+    gtk_container_add(GTK_CONTAINER(window), fixed);
+
+    newBoard(fixed);
+
     gtk_widget_show_all(window);
     gtk_main();
 }
