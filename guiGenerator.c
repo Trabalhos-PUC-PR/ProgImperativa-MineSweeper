@@ -25,9 +25,11 @@ double square_stroke_rgb[] = {0.3, 0.3, 0.3};
 double square_pressed_inner_rgb[] = {0.7, 0.7, 0.7};
 double square_flagged_inner_rgb[] = {1.0, 0.0, 0.0}; // temporario
 double square_bombed_inner_rgb[] = {0.0, 0.0, 0.0}; // temporario
+double square_toomanyflags_inner_rgb[] = {1, 0.43, 0.44};
 // deixei assim mesmo pra ficar facil de mudar caso querer
 
-char bombNumberTextColor[8][256] = {"blue", "green", "yellow", "purple", "red", "darkred", "black", "gray"};
+// https://www.astrouw.edu.pl/~jskowron/colors-x11/rgb.html
+char bombNumberTextColor[8][256] = {"blue", "green", "chocolate1", "purple", "red", "red4", "black", "gray"};
 // tem uma funcao do gdk que faz parse disso
 
 struct Clickable_shape_Holder{
@@ -42,18 +44,7 @@ void newBoard(GtkWidget *parent);
 // 1 = vitoria
 // 2 = derrota
 
-int checkGameEnd(struct Square pressedSquare){
-    if(pressedSquare.isBomb){
-        return 2;
-    }
-    if(totalSafeSquares == totalSquaresRevealed){
-        return 1;
-    }
-    return 0;
-}
-
 void draw_rect(cairo_t *cr, struct Square square){
-
     cairo_set_source_rgb(cr, square_stroke_rgb[0], square_stroke_rgb[1], square_stroke_rgb[2]);
     cairo_set_line_width(cr, square_stroke_width);
     cairo_rectangle(cr, square_stroke_width*0.5, square_stroke_width*0.5, square_width - square_stroke_width, square_height - square_stroke_width);
@@ -69,6 +60,9 @@ void draw_rect(cairo_t *cr, struct Square square){
         cairo_set_source_rgb(cr, square_bombed_inner_rgb[0], square_bombed_inner_rgb[1], square_bombed_inner_rgb[2]);
     }else if(square.isRevealed){
         cairo_set_source_rgb(cr, square_pressed_inner_rgb[0], square_pressed_inner_rgb[1], square_pressed_inner_rgb[2]);
+    }
+    if(square.areThereTooManyFlags){
+        cairo_set_source_rgb(cr, square_toomanyflags_inner_rgb[0], square_toomanyflags_inner_rgb[1], square_toomanyflags_inner_rgb[2]);
     }
     cairo_fill(cr);
     if(square.isRevealed && square.number > 0 && square.number < 9){
@@ -93,30 +87,29 @@ static gboolean on_square_draw_event(GtkWidget *widget, cairo_t *cr, struct Squa
 
 static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpointer data){
     struct Square *square = (struct Square *)data;
+    gboolean continueGame;
+    g_print("vai printar\n");
     if(event->button == 1){ // botao esquerdo do mouse == 1
-        fieldRevealAt(square->yPos, square->xPos);
+        g_print("printou\n");
+        continueGame = fieldRevealAt(square->yPos, square->xPos);
+        g_print("nao crashou\n");
     }else{ // botao direito do mouse == 3
         fieldSetFlagAt(square->yPos, square->xPos);
     }
 
-    GtkWidget *text;
-    GtkTextBuffer *buffer;
-    text = gtk_text_view_new();
-    buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
-    gtk_text_buffer_set_text(buffer, " ", -1);
-    if(square->yPos > 0){
-        gtk_text_buffer_set_text(buffer, g_strdup_printf("%d", square->number), -1);
-    }
-    fieldPrint();
+    //fieldPrint();
 
     gtk_widget_queue_draw(game_matrix);
 
-    int gameState = checkGameEnd(*square);
-    if(gameState == 1){
-        // TODO : mensagem de parabens
-    }else if(gameState == 2){
+    if(continueGame){
+        if(totalSquaresRevealed == totalSafeSquares){
+            // TODO : mensagem de parabens
+            g_print("\nVENCEU");
+        }
+    }else{
         // TODO : mensagem de derrota
         //newBoard(gtk_widget_get_parent(eventBox));
+        g_print("\nPERDEU");
     }
     return TRUE;
 }
