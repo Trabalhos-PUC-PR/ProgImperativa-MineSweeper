@@ -15,9 +15,10 @@ int main(int argc, char **argv){
 }
 
 void loadGame(){
-    fieldWidth = 5;
-    fieldHeight = 5;
-    totalBombs = 2;
+=======
+    fieldWidth = 9;
+    fieldHeight = 9;
+    totalBombs = 10;
     allocateField(fieldWidth, fieldHeight);
     fieldSetRandomBombs(totalBombs);
     fieldPrint();
@@ -38,12 +39,12 @@ void runGame(){
         if (choice == false) {
             fieldSetFlagAt(y, x);
         } else {
-            fieldRevealAt(y, x);
+            game = fieldRevealAt(y, x);
         }
         fieldPrint();
         printf("Safe:[%d/%d] Marked: [%d/%d]\n", totalSquaresRevealed, totalSafeSquares, totalFlaggedSquares, totalBombs);
         printf(" Marked: [%d/%d]\n", totalFlaggedSquares, totalBombs);
-        if (choice == true && !fieldIsThisAFlag(y, x) && fieldIsThisABomb(y, x)) {
+        if (!game || choice == true && !fieldIsThisAFlag(y, x) && fieldIsThisABomb(y, x)) {
             game = false;
             fieldRevealAll();
             fieldPrint();

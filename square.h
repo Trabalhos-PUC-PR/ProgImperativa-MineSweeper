@@ -17,6 +17,7 @@ struct Square{
 	enum boolean isRevealed;
 	enum boolean isFlagged;
 	enum boolean isBomb;
+    enum boolean areThereTooManyFlags;
 };
 
 #endif /* SQUARE_H_ */
