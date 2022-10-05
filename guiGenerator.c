@@ -19,18 +19,15 @@ double square_spacing = 1.0;
 
 int matrix_margin = 10;
 
-// pega o valor de 0 a 255 e divide por 255
 double square_inner_rgb[] = {0.9, 0.9, 0.9};
 double square_stroke_rgb[] = {0.3, 0.3, 0.3};
 double square_pressed_inner_rgb[] = {0.7, 0.7, 0.7};
 double square_flagged_inner_rgb[] = {1.0, 0.0, 0.0}; // temporario
 double square_bombed_inner_rgb[] = {0.0, 0.0, 0.0}; // temporario
 double square_toomanyflags_inner_rgb[] = {1, 0.43, 0.44};
-// deixei assim mesmo pra ficar facil de mudar caso querer
 
 // https://www.astrouw.edu.pl/~jskowron/colors-x11/rgb.html
 char bombNumberTextColor[8][256] = {"blue", "green", "chocolate1", "purple", "red", "red4", "black", "gray"};
-// tem uma funcao do gdk que faz parse disso
 
 struct Clickable_shape_Holder{
     struct Square *square;
@@ -38,11 +35,6 @@ struct Clickable_shape_Holder{
 };
 
 void newBoard(GtkWidget *parent);
-
-// sem enum pra isso
-// 0 = continua o jogo
-// 1 = vitoria
-// 2 = derrota
 
 void draw_rect(cairo_t *cr, struct Square square){
     cairo_set_source_rgb(cr, square_stroke_rgb[0], square_stroke_rgb[1], square_stroke_rgb[2]);
@@ -53,10 +45,10 @@ void draw_rect(cairo_t *cr, struct Square square){
 
     cairo_set_source_rgb(cr, square_inner_rgb[0], square_inner_rgb[1], square_inner_rgb[2]);
     if(square.isFlagged){
-        // TODO : colocar codigo para bandeira
+        // TODO
         cairo_set_source_rgb(cr, square_flagged_inner_rgb[0], square_flagged_inner_rgb[1], square_flagged_inner_rgb[2]);
     }else if(square.isBomb && square.isRevealed){
-        // TODO : mostrar bomba no quadrado
+        // TODO
         cairo_set_source_rgb(cr, square_bombed_inner_rgb[0], square_bombed_inner_rgb[1], square_bombed_inner_rgb[2]);
     }else if(square.isRevealed){
         cairo_set_source_rgb(cr, square_pressed_inner_rgb[0], square_pressed_inner_rgb[1], square_pressed_inner_rgb[2]);
@@ -89,11 +81,11 @@ static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpoi
     struct Square *square = (struct Square *)data;
     gboolean continueGame;
     g_print("vai printar\n");
-    if(event->button == 1){ // botao esquerdo do mouse == 1
+    if(event->button == 1){
         g_print("printou\n");
         continueGame = fieldRevealAt(square->yPos, square->xPos);
         g_print("nao crashou\n");
-    }else{ // botao direito do mouse == 3
+    }else{
         fieldSetFlagAt(square->yPos, square->xPos);
     }
 
@@ -103,12 +95,11 @@ static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpoi
 
     if(continueGame){
         if(totalSquaresRevealed == totalSafeSquares){
-            // TODO : mensagem de parabens
+            // TODO
             g_print("\nVENCEU");
         }
     }else{
-        // TODO : mensagem de derrota
-        //newBoard(gtk_widget_get_parent(eventBox));
+        // TODO
         g_print("\nPERDEU");
     }
     return TRUE;
@@ -131,13 +122,11 @@ void newBoard(GtkWidget *parent){
 
     for(int i = 0; i < fieldWidth; i++){
         for(int j = 0; j < fieldHeight; j++){
-            // cria o container que vai detectar eventos
             GtkWidget *eventBox;
             eventBox = gtk_event_box_new();
 
             gtk_grid_attach(GTK_GRID(game_matrix), eventBox, i, j, 1, 1);
 
-            // cria o quadrado
             GtkWidget *drawingArea;
             drawingArea = gtk_drawing_area_new();
             gtk_widget_set_size_request(drawingArea, square_width + square_spacing, square_height + square_spacing);
@@ -146,7 +135,6 @@ void newBoard(GtkWidget *parent){
 
             struct Square *square;
             square = &field[j][i];
-            // criar evento pra quando sair o click
             g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), square);
         }
     }
@@ -159,7 +147,7 @@ void run(int argc, char **argv) {
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
     GtkWidget *fixed;
-    fixed = gtk_fixed_new(); // cria um container pra guardar a matriz, ao inves de so colocar ela direto no top view
+    fixed = gtk_fixed_new();
     gtk_container_add(GTK_CONTAINER(window), fixed);
 
     newBoard(fixed);
