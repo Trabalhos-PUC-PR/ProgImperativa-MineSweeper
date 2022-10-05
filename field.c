@@ -180,6 +180,7 @@ void fieldResetField(){
             field[h][w].isRevealed = false;
             field[h][w].isFlagged = false;
             field[h][w].isBomb = false;
+            field[h][w].areThereTooManyFlags = false;
             field[h][w].number = 0;
         }
     }
