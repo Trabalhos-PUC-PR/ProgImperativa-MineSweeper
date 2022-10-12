@@ -2,7 +2,7 @@
 
 #include "field.h"
 #include "boolean.h"
-#include "guiGenerator.h"
+#include "GUI/guiGenerator.h"
 
 void runGame();
 void loadGame();

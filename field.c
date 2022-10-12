@@ -20,7 +20,7 @@ struct Square **field;
 char separator = '|';
 
 /**
- * @brief allocates a field with given height and width.
+ * @brief allocates a field with given height and matrix_width.
  * If any of the given measures are less than two, the field will be set as 2x2
  */
 void allocateField(int height, int width) {
