@@ -14,8 +14,8 @@ int endTime;
 
 int main(int argc, char **argv){
     loadGame();
-//    run(argc, argv);
-    runGame();
+    run(argc, argv);
+//    runGame();
     return 0;
 }
 
