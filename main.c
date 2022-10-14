@@ -3,7 +3,7 @@
 
 #include "field.h"
 #include "boolean.h"
-#include "guiGenerator.h"
+#include "GUI/guiGenerator.h"
 
 void runGame();
 void loadGame();
@@ -14,8 +14,8 @@ int endTime;
 
 int main(int argc, char **argv){
     loadGame();
-//    run(argc, argv);
-    runGame();
+    run(argc, argv);
+//    runGame();
     return 0;
 }
 
