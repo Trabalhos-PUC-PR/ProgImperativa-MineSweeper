@@ -21,24 +21,30 @@ double square_toomanyflags_inner_rgb[] = {1, 0.43, 0.44};
 char bombNumberTextColor[8][256] = {"blue", "green", "chocolate1", "purple", "red", "red4", "black", "gray"};
 
 struct GUI {
-    GtkWidget *window;
-    GtkWidget *game_matrix;
-    GtkWidget *game_matrix_container;
+    GtkWidget *window, *game_matrix, *game_matrix_container, *main_box;
+    int matrix_original_width, matrix_original_height, window_original_height, window_original_width;
 } game_gui;
 
-int base_square_size = 30;
+const int original_square_size = 30;
+int square_size = original_square_size;
 int matrix_margin = 25;
 double square_stroke_width = 1.0;
 int square_spacing = 0;
 
+// width, height, bombs
+const int difficulty_easy[] = {9, 9, 10};
+const int difficulty_medium[] = {16, 16, 40};
+const int difficulty_hard[] = {30, 16, 99};
+
 void addToMatrix();
+void createGui();
 
 void draw_rect(cairo_t *cr, struct Square square){
     cairo_set_source_rgb(cr, square_stroke_rgb[0], square_stroke_rgb[1], square_stroke_rgb[2]);
     cairo_set_line_width(cr, square_stroke_width);
-    cairo_rectangle(cr, square_stroke_width,square_stroke_width,
-                    base_square_size-square_stroke_width,
-                    base_square_size-square_stroke_width);
+    cairo_rectangle(cr, square_stroke_width, square_stroke_width,
+                    square_size - square_stroke_width,
+                    square_size - square_stroke_width);
     cairo_stroke_preserve(cr);
     cairo_set_source_rgb(cr, square_inner_rgb[0], square_inner_rgb[1], square_inner_rgb[2]);
     if(square.isFlagged){
@@ -48,25 +54,28 @@ void draw_rect(cairo_t *cr, struct Square square){
         // TODO
         cairo_set_source_rgb(cr, square_bombed_inner_rgb[0], square_bombed_inner_rgb[1], square_bombed_inner_rgb[2]);
     }else if(square.isRevealed){
-        cairo_set_source_rgb(cr, square_pressed_inner_rgb[0], square_pressed_inner_rgb[1], square_pressed_inner_rgb[2]);
-    }
-    if(square.areThereTooManyFlags){
-        cairo_set_source_rgb(cr, square_toomanyflags_inner_rgb[0], square_toomanyflags_inner_rgb[1], square_toomanyflags_inner_rgb[2]);
+        if(square.areThereTooManyFlags){
+            cairo_set_source_rgb(cr, square_toomanyflags_inner_rgb[0], square_toomanyflags_inner_rgb[1], square_toomanyflags_inner_rgb[2]);
+        }else{
+            cairo_set_source_rgb(cr, square_pressed_inner_rgb[0], square_pressed_inner_rgb[1], square_pressed_inner_rgb[2]);
+        }
+        cairo_fill(cr);
+        if(square.number > 0){
+            GdkRGBA color;
+            if(!gdk_rgba_parse(&color, bombNumberTextColor[square.number-1])){
+                color.red = 0x0000;
+                color.green = 0x0000;
+                color.blue = 0x0000;
+            }
+            cairo_select_font_face(cr, "",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_BOLD);
+            cairo_set_font_size(cr, square_size * 0.9);
+            cairo_move_to(cr, square_size * 0.256, square_size * 0.862);
+            cairo_set_source_rgb(cr, color.red, color.green, color.blue);
+            cairo_show_text(cr, g_strdup_printf("%d", square.number));
+        }
+        return;
     }
     cairo_fill(cr);
-    if(square.isRevealed && square.number > 0 && square.number < 9){
-        GdkRGBA color;
-        if(!gdk_rgba_parse(&color, bombNumberTextColor[square.number-1])){
-            color.red = 0x0000;
-            color.green = 0x0000;
-            color.blue = 0x0000;
-        }
-        cairo_select_font_face(cr, "Purisa",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_BOLD);
-        cairo_set_font_size(cr, base_square_size * 0.5);
-        cairo_move_to(cr, base_square_size * 0.3, base_square_size * 0.7);
-        cairo_set_source_rgb(cr, color.red, color.green, color.blue);
-        cairo_show_text(cr, g_strdup_printf("%d", square.number));
-    }
 }
 
 static gboolean on_square_draw_event(GtkWidget *parent, cairo_t *cr, struct Square *square){
@@ -76,7 +85,7 @@ static gboolean on_square_draw_event(GtkWidget *parent, cairo_t *cr, struct Squa
 
 static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpointer data){
     struct Square *square = (struct Square *)data;
-    if(totalSquaresRevealed == 0){
+    if(totalSquaresRevealed == 0 && totalFlaggedSquares == 0){
         fieldFirstClick(square->yPos, square->xPos);
     }
     gboolean continueGame = TRUE;
@@ -98,31 +107,55 @@ static gboolean square_on_press(GtkWidget *eventBox, GdkEventButton *event, gpoi
     return TRUE;
 }
 
-static gboolean resizeChange(GtkWidget *widget, GdkEvent *event, gpointer userdata){
-    int width, height;
-    gtk_window_get_size(GTK_WINDOW(game_gui.window), &width, &height);
+static gboolean resizeChange(int width, int height){
     if(width > height){
-        base_square_size = height/fieldHeight;
+        square_size = height / fieldHeight;
     }else{
-        base_square_size = width/fieldWidth;
+        square_size = width / fieldWidth;
     }
     return FALSE;
 }
 
+void centerMatrix(){
+    int windowWidth, windowHeight;
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(GTK_WIDGET(game_gui.game_matrix), &allocation);
+    gtk_window_get_size(GTK_WINDOW(game_gui.window), &windowWidth, &windowHeight);
+    gtk_widget_set_margin_start(game_gui.game_matrix_container, (windowWidth/2) - allocation.width/2);
+    gtk_widget_set_margin_top(game_gui.game_matrix_container, ((windowHeight/2) - allocation.height/2) - 15);
+    gtk_widget_set_margin_bottom(game_gui.game_matrix_container, ((windowHeight/2) - allocation.height/2) + matrix_margin);
+}
+
+static gboolean MatrixOnSizeAllocation(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data) {
+    int windowWidth, windowHeight;
+    gtk_window_get_size(GTK_WINDOW(game_gui.window), &windowWidth, &windowHeight);
+    double ratioX = (double) (windowWidth - matrix_margin*2) / (double) game_gui.matrix_original_width;
+    double ratioY = (double) (windowHeight - (matrix_margin*2)) / (double) game_gui.matrix_original_height;
+    double ratio;
+    if(ratioY > ratioX){
+        ratio = ratioX;
+    }else{
+        ratio = ratioY;
+    }
+    allocation->width = game_gui.matrix_original_width * ratio;
+    allocation->height = game_gui.matrix_original_height * ratio;
+    gtk_widget_size_allocate(GTK_WIDGET(widget), allocation);
+    resizeChange(allocation->width, allocation->height);
+    centerMatrix();
+    return TRUE;
+}
+
 void drawBoard(GtkWidget *parent){
 
-    GtkAlignment alignment;
+    game_gui.matrix_original_width = square_size * fieldWidth;
+    game_gui.matrix_original_height = square_size * fieldHeight;
 
-    game_gui.game_matrix_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    game_gui.game_matrix_container = gtk_box_new(GTK_ORIENTATION_VERTICAL, matrix_margin);
 
     game_gui.game_matrix = gtk_grid_new();
 
     gtk_box_pack_start(GTK_BOX(parent), game_gui.game_matrix_container, TRUE, TRUE, 0);
-    gtk_box_pack_end(GTK_BOX(game_gui.game_matrix_container), game_gui.game_matrix, TRUE, TRUE, 0);
-
-    gtk_widget_set_margin_start(game_gui.game_matrix_container, matrix_margin*2 - matrix_margin*0.5);
-    gtk_widget_set_margin_top(game_gui.game_matrix_container, matrix_margin);
-    gtk_widget_set_margin_bottom(game_gui.game_matrix_container, matrix_margin);
+    gtk_box_pack_start(GTK_BOX(game_gui.game_matrix_container), game_gui.game_matrix, FALSE, TRUE, 0);
 
     gtk_grid_set_column_spacing(GTK_GRID(game_gui.game_matrix), square_spacing);
     gtk_grid_set_row_spacing(GTK_GRID(game_gui.game_matrix), square_spacing);
@@ -132,20 +165,9 @@ void drawBoard(GtkWidget *parent){
 
     gtk_widget_set_halign(GTK_WIDGET(game_gui.game_matrix), GTK_ALIGN_FILL);
     gtk_widget_set_valign(GTK_WIDGET(game_gui.game_matrix), GTK_ALIGN_FILL);
-
+    g_signal_connect (game_gui.game_matrix, "size-allocate", G_CALLBACK(MatrixOnSizeAllocation), NULL);
+    centerMatrix();
     addToMatrix();
-}
-
-static gboolean onSizeAllocation(GtkWidget *widget, GdkRectangle *allocation, gpointer user_data) {
-    int width, height;
-    gtk_window_get_size(GTK_WINDOW(game_gui.window), &width, &height);
-    if(allocation->width > allocation->height){
-        allocation->width = allocation->height;
-    }else{
-        allocation->height = allocation->width;
-    }
-    gtk_widget_size_allocate(GTK_WIDGET(widget), allocation);
-    return TRUE;
 }
 
 void addToMatrix(){
@@ -161,64 +183,158 @@ void addToMatrix(){
 
             gtk_container_add(GTK_CONTAINER(eventBox), drawingArea);
 
-            gtk_widget_set_size_request(GTK_WIDGET(drawingArea), -1, -1);
-
             g_signal_connect (drawingArea, "draw", G_CALLBACK(on_square_draw_event), &field[j][i]);
-            g_signal_connect (game_gui.game_matrix, "size-allocate", G_CALLBACK(onSizeAllocation), NULL);
             struct Square *square;
             square = &field[j][i];
             g_signal_connect(G_OBJECT(eventBox), "button_release_event", G_CALLBACK(square_on_press), square);
-            gameActive = TRUE;
         }
     }
 }
 
-void run(int argc, char **argv) {
-    gtk_init(&argc, &argv);
+void newBoard(){
+    fieldResetField();
+    gtk_widget_queue_draw(GTK_WIDGET(game_gui.game_matrix));
+}
 
+void redrawBoard(){
+    gtk_widget_destroy(GTK_WIDGET(game_gui.window));
+    game_gui.window_original_height = (square_size * (fieldHeight + 1));
+    game_gui.window_original_width = (square_size * fieldWidth) - matrix_margin;
+    square_size = original_square_size;
+    createGui();
+}
+
+enum boolean difficultyChange = false;
+
+void onEasyActivate(){
+    difficultyChange = true;
+    totalBombs = difficulty_easy[2];
+    fieldResizeField(difficulty_easy[1], difficulty_easy[0]);
+    redrawBoard();
+    difficultyChange = false;
+}
+void onMediumActivate(){
+    difficultyChange = true;
+    totalBombs = difficulty_medium[2];
+    fieldResizeField(difficulty_medium[1], difficulty_medium[0]);
+    redrawBoard();
+    difficultyChange = false;
+}
+void onHardActivate(){
+    difficultyChange = true;
+    totalBombs = difficulty_hard[2];
+    fieldResizeField(difficulty_hard[1], difficulty_hard[0]);
+    redrawBoard();
+    difficultyChange = false;
+}
+void onCustomActivate(){
+    // TODO
+}
+
+void showAboutDialog(){
+    GtkWidget *aboutDialog = gtk_about_dialog_new();
+
+    gtk_about_dialog_set_website(GTK_ABOUT_DIALOG(aboutDialog), "https://github.com/Trabalhos-PUC-PR/ProgImperativa-MineSweeper");
+    gtk_about_dialog_set_program_name(GTK_ABOUT_DIALOG(aboutDialog), "MineSweeper");
+    gtk_about_dialog_set_comments(GTK_ABOUT_DIALOG(aboutDialog), "Simple mineSweeper written in C");
+
+    gtk_about_dialog_set_website_label(GTK_ABOUT_DIALOG(aboutDialog), "GitHub");
+
+    gtk_dialog_run(GTK_DIALOG(aboutDialog));
+    gtk_widget_destroy(aboutDialog);
+}
+
+void onDestroyEvent(){
+    if(!difficultyChange){
+        gtk_main_quit();
+    }
+}
+
+void createGui(){
     game_gui.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    g_signal_connect(game_gui.window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    g_signal_connect(game_gui.window, "configure-event", G_CALLBACK(resizeChange), NULL);
+    g_signal_connect(game_gui.window, "destroy", G_CALLBACK(onDestroyEvent), NULL);
 
-    gtk_window_set_default_size(GTK_WINDOW(game_gui.window), base_square_size*fieldWidth, base_square_size*fieldHeight);
+    game_gui.window_original_height = (square_size * (fieldHeight + 1));
+    game_gui.window_original_width = (square_size * fieldWidth) - matrix_margin;
 
-    GtkWidget *box, *menuBar;
+    gtk_window_set_default_size(GTK_WINDOW(game_gui.window), game_gui.window_original_width, game_gui.window_original_height);
+
+    GtkWidget *menuBar;
+
+    GtkWidget *gameSeparatorMi = gtk_separator_menu_item_new();
+    GtkWidget *difficultySeparatorMi = gtk_separator_menu_item_new();
+    GtkWidget *helpSeparatorMi = gtk_separator_menu_item_new();
 
     GtkWidget *game, *difficulty, *help; // dropdown menus
     GtkWidget *gameMi, *difficultyMi, *helpMi; // menu items
-    GtkWidget *quitMi; // sub menu items
+    GtkWidget *quitMi, *newMi; // game sub menu items
+    GtkWidget  *easyMi, *mediumMi, *hardMi, *customMi; // difficulty sub menu items
+    GtkWidget *aboutMi; // help sub menu items
     menuBar = gtk_menu_bar_new();
 
-    game = gtk_menu_new();
     difficulty = gtk_menu_new();
+    difficultyMi = gtk_menu_item_new_with_label("Difficulty");
+    easyMi = gtk_menu_item_new_with_label("Easy");
+    mediumMi = gtk_menu_item_new_with_label("Medium");
+    hardMi = gtk_menu_item_new_with_label("Hard");
+    customMi = gtk_menu_item_new_with_label("Custom");
+
     help = gtk_menu_new();
+    helpMi = gtk_menu_item_new_with_label("Help");
+    aboutMi = gtk_menu_item_new_with_label("About");
 
     game = gtk_menu_new();
+    newMi = gtk_menu_item_new_with_label("New");
     gameMi = gtk_menu_item_new_with_label("Game");
     quitMi = gtk_menu_item_new_with_label("Quit");
 
     gtk_menu_item_set_submenu(GTK_MENU_ITEM(gameMi), game);
-    gtk_menu_shell_append(GTK_MENU_SHELL(game), quitMi);
-    g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(difficultyMi), difficulty);
+    gtk_menu_item_set_submenu(GTK_MENU_ITEM(helpMi), help);
 
-    box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_container_add(GTK_CONTAINER(game_gui.window), box);
+    gtk_menu_shell_append(GTK_MENU_SHELL(game), newMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(game), gameSeparatorMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(game), quitMi);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(difficulty), easyMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(difficulty), mediumMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(difficulty), hardMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(difficulty), difficultySeparatorMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(difficulty), customMi);
+
+    gtk_menu_shell_append(GTK_MENU_SHELL(help), helpSeparatorMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(help), aboutMi);
+
+    g_signal_connect(G_OBJECT(quitMi), "activate", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(G_OBJECT(newMi), "activate", G_CALLBACK(newBoard), NULL);
+
+    g_signal_connect(G_OBJECT(easyMi), "activate", G_CALLBACK(onEasyActivate), NULL);
+    g_signal_connect(G_OBJECT(mediumMi), "activate", G_CALLBACK(onMediumActivate), NULL);
+    g_signal_connect(G_OBJECT(hardMi), "activate", G_CALLBACK(onHardActivate), NULL);
+    g_signal_connect(G_OBJECT(customMi), "activate", G_CALLBACK(onCustomActivate), NULL);
+
+    g_signal_connect(G_OBJECT(aboutMi), "activate", G_CALLBACK(showAboutDialog), NULL);
+
+    game_gui.main_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_container_add(GTK_CONTAINER(game_gui.window), game_gui.main_box);
 
     gtk_menu_shell_append(GTK_MENU_SHELL(menuBar), gameMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menuBar), difficultyMi);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menuBar), helpMi);
 
-    gtk_box_set_homogeneous(GTK_BOX(box), FALSE);
+    gtk_box_set_homogeneous(GTK_BOX(game_gui.main_box), FALSE);
 
-    gtk_box_pack_start(GTK_BOX(box), menuBar, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(game_gui.main_box), menuBar, FALSE, TRUE, 0);
 
     gtk_window_set_type_hint(GTK_WINDOW(game_gui.window), GDK_WINDOW_TYPE_HINT_DIALOG);
 
-    GdkGeometry geometry;
-    geometry.min_aspect = 1;
-    geometry.max_aspect = 1;
-
-    gtk_window_set_geometry_hints(GTK_WINDOW(game_gui.window), game_gui.window, &geometry, (GdkWindowHints) GDK_HINT_ASPECT);
-
-    drawBoard(box);
+    drawBoard(game_gui.main_box);
+    gtk_window_resize(GTK_WINDOW(game_gui.window), game_gui.window_original_width+1, game_gui.window_original_height+1);
     gtk_widget_show_all(game_gui.window);
+}
+
+void run(int argc, char **argv) {
+    gtk_init(&argc, &argv);
+    createGui();
     gtk_main();
 }

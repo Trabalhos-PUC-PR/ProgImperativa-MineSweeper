@@ -20,11 +20,11 @@ int main(int argc, char **argv){
 }
 
 void loadGame(){
-    fieldWidth = 9;
-    fieldHeight = 9;
+    fieldWidth = 6;
+    fieldHeight = 5;
     totalBombs = 20;
     startTime = time(NULL);
-    allocateField(fieldWidth, fieldHeight);
+    allocateField(fieldHeight, fieldWidth);
     fieldPrint();
 }
 
