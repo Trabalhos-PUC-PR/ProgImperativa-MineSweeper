@@ -5,12 +5,9 @@
 #include "boolean.h"
 #include "GUI/guiGenerator.h"
 
-void runGame();
 void loadGame();
 
 enum boolean game = true;
-int startTime;
-int endTime;
 
 int main(int argc, char **argv){
     loadGame();
@@ -20,10 +17,9 @@ int main(int argc, char **argv){
 }
 
 void loadGame(){
-    fieldWidth = 6;
-    fieldHeight = 5;
-    totalBombs = 20;
-    startTime = time(NULL);
+    fieldWidth = 9;
+    fieldHeight = 9;
+    totalBombs = 10;
     allocateField(fieldHeight, fieldWidth);
     fieldPrint();
 }
@@ -65,9 +61,4 @@ void runGame(){
             printf("WON THE GAME!\n");
         }
     }
-    endTime = time(NULL);
-    int seconds = endTime - startTime;
-    int minutes = seconds/60;
-    seconds = seconds % 60;
-    printf("Elapsed: %02d:%02ds\n",minutes, seconds);
 }
