@@ -7,6 +7,7 @@
 #include "gtk/gtk.h"
 #include "field.h"
 #include "square.h"
+#include "ctype.h"
 
 double square_inner_rgb[] = {0.9, 0.9, 0.9};
 double square_stroke_rgb[] = {0.3, 0.3, 0.3};
@@ -32,6 +33,10 @@ struct Timer {
     long secondsElapsed;
     enum boolean active;
 } timer;
+
+struct CustomDialogEntries {
+    GtkWidget *width, *height, *bombs;
+};
 
 const int original_square_size = 40;
 int square_size = original_square_size;
@@ -277,8 +282,77 @@ void onHardActivate(){
     redrawBoard();
     difficultyChange = false;
 }
+
+enum boolean isNumber(const char *string){
+    if(string[0] == '\0'){
+        return false;
+    }
+    while (*string){
+        if(!isdigit(*string++)){
+            return false;
+        }
+    }
+    return true;
+}
+
+// -5 = ok
+// -6 = cancel
+static void onCustomDialogResponse(GtkWidget *widget, gint response_id, gpointer data){
+    if(response_id == -5){
+        struct CustomDialogEntries* entries = data;
+        const char *width = gtk_entry_get_text(GTK_ENTRY(entries->width));
+        const char *height = gtk_entry_get_text(GTK_ENTRY(entries->height));
+        const char *bombs = gtk_entry_get_text(GTK_ENTRY(entries->bombs));
+
+        if(!isNumber(width) || !isNumber(height) || !isNumber(bombs)){
+            return;
+        }
+
+        difficultyChange = true;
+        totalBombs = atoi(bombs);
+        fieldResizeField(atoi(width), atoi(height));
+        redrawBoard();
+        difficultyChange = false;
+        gtk_widget_destroy(widget);
+        free(data);
+    }else{
+        free(data);
+        gtk_widget_destroy(widget);
+    }
+}
+
 void onCustomActivate(){
-    // TODO
+    GtkWidget *dialog, *contentArea, *grid, *widthLabel, *heightLabel, *bombsLabel;
+    struct CustomDialogEntries *customDialogEntries = malloc(sizeof(*customDialogEntries));
+
+    dialog = gtk_dialog_new_with_buttons("Custom Board", GTK_WINDOW(game_gui.window), GTK_DIALOG_MODAL, "Ok", GTK_RESPONSE_OK, "Cancel", GTK_RESPONSE_CANCEL, NULL);
+    grid = gtk_grid_new();
+    contentArea = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    gtk_container_add(GTK_CONTAINER(contentArea), grid);
+
+    customDialogEntries->width = gtk_entry_new();
+    customDialogEntries->height = gtk_entry_new();
+    customDialogEntries->bombs = gtk_entry_new();
+    gtk_entry_set_text(GTK_ENTRY(customDialogEntries->width), g_strdup_printf("%d", fieldWidth));
+    gtk_entry_set_text(GTK_ENTRY(customDialogEntries->height), g_strdup_printf("%d", fieldHeight));
+    gtk_entry_set_text(GTK_ENTRY(customDialogEntries->bombs), g_strdup_printf("%d", totalBombs));
+    widthLabel = gtk_label_new("Width: ");
+    heightLabel = gtk_label_new("Height: ");
+    bombsLabel = gtk_label_new("Bombs: ");
+
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+
+    gtk_grid_attach(GTK_GRID(grid), widthLabel, 0, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), heightLabel, 0, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), bombsLabel, 0, 2, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), customDialogEntries->width, 1, 0, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), customDialogEntries->height, 1, 1, 1, 1);
+    gtk_grid_attach(GTK_GRID(grid), customDialogEntries->bombs, 1, 2, 1, 1);
+
+    gtk_widget_show_all(dialog);
+    g_signal_connect(GTK_DIALOG(dialog), "response", G_CALLBACK(onCustomDialogResponse), customDialogEntries);
+
 }
 
 void showAboutDialog(){
