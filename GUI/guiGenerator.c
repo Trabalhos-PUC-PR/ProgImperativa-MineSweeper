@@ -420,10 +420,10 @@ void createGui(){
 
     difficulty = gtk_menu_new();
     difficultyMi = gtk_menu_item_new_with_label("Difficulty");
-    easyMi = gtk_menu_item_new_with_label("Easy");
-    mediumMi = gtk_menu_item_new_with_label("Medium");
-    hardMi = gtk_menu_item_new_with_label("Hard");
-    customMi = gtk_menu_item_new_with_label("Custom");
+    easyMi = gtk_menu_item_new_with_label(g_strdup_printf("Easy: %dx%d, %d bombs", difficulty_easy[0], difficulty_easy[1], difficulty_easy[2]));
+    mediumMi = gtk_menu_item_new_with_label(g_strdup_printf("Medium: %dx%d, %d bombs", difficulty_medium[0], difficulty_medium[1], difficulty_medium[2]));
+    hardMi = gtk_menu_item_new_with_label(g_strdup_printf("Hard: %dx%d, %d bombs", difficulty_hard[0], difficulty_hard[1], difficulty_hard[2]));
+    customMi = gtk_menu_item_new_with_label("Custom...");
 
     help = gtk_menu_new();
     helpMi = gtk_menu_item_new_with_label("Help");
