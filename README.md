@@ -3,7 +3,7 @@
 Minesweeper made using the C language!  
 We took inspiration from [Simon Tatham's Portable Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/) Minesweeper implementation  
   
-#### Download the latest release for linux [here](https://github.com/Trabalhos-PUC-PR/ProgImperativa-MineSweeper/releases)  
+<!--#### Download the latest release for linux [here](https://github.com/Trabalhos-PUC-PR/ProgImperativa-MineSweeper/releases)  -->
 
 ## Dependencies:
 - GTK+3
