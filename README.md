@@ -2,8 +2,22 @@
 
 Minesweeper made using the C language!  
 We took inspiration from [Simon Tatham's Portable Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/) Minesweeper implementation  
-  
-<!--#### Download the latest release for linux [here](https://github.com/Trabalhos-PUC-PR/ProgImperativa-MineSweeper/releases)  -->
+
+## How to compile and run (linux)
+- You'll need CMake installed on your distro.
+- On a terminal, run the following commands: 
+```
+git clone https://github.com/Trabalhos-PUC-PR/ProgImperativa-MineSweeper.git
+cd ProgImperativa-MineSweeper
+cmake CMakeLists.txt
+cmake --build .
+```
+
+- To open the game via CLI, run the following command where the compiled minesweeper is located:
+```
+./MineSweeper
+```
+- Or alternatively, double click the executable on your favorite file browser
 
 ## Dependencies:
 - GTK+3
